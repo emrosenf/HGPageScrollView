@@ -24,7 +24,7 @@
 //	THE SOFTWARE.
 //
 
-
+#import "EGOGradientView.h"
 #import "HGPageScrollView.h"
 #import <QuartzCore/QuartzCore.h>
 
@@ -150,14 +150,10 @@ typedef enum{
 	_reusablePages = [[NSMutableDictionary alloc] initWithCapacity:3]; 
 	_deletedPages = [[NSMutableArray alloc] initWithCapacity:0];
     
-	// set gradient for background view
-	CAGradientLayer *glayer = [CAGradientLayer layer];
-	glayer.frame = _pageDeckBackgroundView.bounds;
-	UIColor *topColor = [UIColor colorWithRed:0.8 green:0.8 blue:0.8 alpha:1.0]; //light blue-gray
 	UIColor *bottomColor = [UIColor colorWithRed:0.4 green:0.4 blue:0.4 alpha:1.0]; //dark blue-gray
-	glayer.colors = [NSArray arrayWithObjects:(id)[topColor CGColor], (id)[bottomColor CGColor], nil];
-	[_pageDeckBackgroundView.layer insertSublayer:glayer atIndex:0];
-	
+	_pageDeckBackgroundView.colors = [NSArray arrayWithObjects:(id)[topColor CGColor], (id)[bottomColor CGColor], nil];
+	_pageDeckBackgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+    
 	// set tap gesture recognizer for page selection
 	UITapGestureRecognizer *recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGestureFrom:)];
 	[_scrollView addGestureRecognizer:recognizer];

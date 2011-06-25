@@ -93,7 +93,7 @@ typedef enum{
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @class HGTouchView; 
-
+@class EGOGradientView;
 @interface HGPageScrollView : UIView <UIScrollViewDelegate, UIGestureRecognizerDelegate> {
 
 	@private
@@ -105,7 +105,7 @@ typedef enum{
 
 	IBOutlet UIView			*_pageHeaderView;
     UIView                  *_userHeaderView; 
-	IBOutlet UIView			*_pageDeckBackgroundView;
+	IBOutlet EGOGradientView			*_pageDeckBackgroundView;
 	
 	IBOutlet UILabel		*_pageDeckTitleLabel;
 	IBOutlet UILabel		*_pageDeckSubtitleLabel;
