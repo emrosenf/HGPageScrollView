@@ -31,7 +31,7 @@
 
 @synthesize reuseIdentifier=_reuseIdentifier;
 @synthesize identityFrame=_identityFrame;
-
+@synthesize closeButton = _closeButton;
 
 - (id) initWithCoder:(NSCoder *)aDecoder
 {    
