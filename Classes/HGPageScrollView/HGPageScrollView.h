@@ -125,10 +125,20 @@ typedef enum{
 	
 	HGPageView				*_selectedPage;
     
+    
+    CGFloat                 _pageMargin;
+    CGFloat                 _miniScaleFactor;
+    
+    UIDeviceOrientation     _lastOrientation;
+    
+    UIToolbar               *_toolbar;
+    
     BOOL                    _isPendingScrolledPageUpdateNotification;
+    
+    UIBarButtonItem         *_newTabButton;
 }
 
-
+@property (nonatomic, retain)   UIBarButtonItem *newTabButton;
 @property(nonatomic,assign)   id <HGPageScrollViewDataSource> dataSource;
 @property(nonatomic,assign)   id <HGPageScrollViewDelegate>   delegate;
 
