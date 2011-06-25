@@ -156,6 +156,8 @@ typedef enum{
 
 @property (nonatomic, readonly)	HGPageScrollViewMode viewMode;
 
+
+@property (nonatomic, assign) BOOL isRotating;
 - (HGPageView *)dequeueReusablePageWithIdentifier:(NSString *)identifier;  // Used by the delegate to acquire an already allocated page, instead of allocating a new one
 
 // Data

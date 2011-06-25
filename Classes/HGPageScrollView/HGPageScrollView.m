@@ -135,12 +135,137 @@ typedef enum{
 @synthesize indexesWithinVisibleRange;
 @synthesize indexesAfterVisibleRange; 
 
+@synthesize isRotating;
 
+@synthesize newTabButton = _newTabButton;
+
+
+- (void) didRotate:(NSNotification*)notification {
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    if (!UIDeviceOrientationIsPortrait(orientation) && !UIDeviceOrientationIsLandscape(orientation)) {
+        
+        return;
+    }
+    if (![self.delegate shouldAutorotateToInterfaceOrientation:orientation]) {
+        // auto rotate is off
+        return;
+    }
+    _lastOrientation = orientation;
+    BOOL value;
+	id key = [[AppSettings sharedInstance] getKey:@"rotationLock"];
+	if (!key)
+		value = NO;
+	else {
+		value = [key boolValue];
+	}
+	if (value) return;
+
+    if (_viewMode == HGPageScrollViewModePage) {
+        if (!_selectedPage.superview) {
+            [_visiblePages addObject:_selectedPage];
+            [self addSubview:_selectedPage];
+        }
+        [_selectedPage didRotate:nil];
+            /*CGRect frm = self.frame;
+            frm.size.height = _selectedPage.frame.size.height;
+            self.frame = frm;*/
+    }
+
+    _selectedPage.closeButton.hidden = YES;
+    NSInteger index = [self indexForSelectedPage];
+    if (index != NSNotFound) {
+        [self layoutDeck];
+        _selectedPage = [self pageAtIndex:index];
+        _selectedPage.closeButton.center = _selectedPage.frame.origin;
+        _selectedPage.closeButton.hidden = NO;
+        [self scrollToPageAtIndex:index animated:NO];
+        [self setAlphaForPage:_selectedPage];
+        
+    }
+}
+
+- (void) layoutDeck {
+    //if (_viewMode == HGPageScrollViewModeDeck) {
+    CGRect selfFrm = self.frame;
+    CGFloat width = 0.0f;
+    CGFloat height = 0.0f;
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    
+    if (![self.delegate shouldAutorotateToInterfaceOrientation:orientation]) {
+        // auto rotate is off
+        orientation = _lastOrientation;
+    }
+    if (!UIDeviceOrientationIsPortrait(orientation) && !UIDeviceOrientationIsLandscape(orientation)) {
+        orientation = _lastOrientation;
+    }
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+    {
+        if (UIDeviceOrientationIsLandscape(orientation)) {
+            width = _miniScaleFactor * 480;
+            height = _miniScaleFactor * 270;
+            selfFrm.size.height = 270;
+        }
+        else {
+            width = _miniScaleFactor * 320;
+            height = _miniScaleFactor * 416;
+#if WIKI || WIKITRAVEL
+            selfFrm.size.height = 416;
+#else
+            selfFrm.size.height = 460-88;
+#endif
+        }
+    } else {
+        if (UIDeviceOrientationIsLandscape(orientation)) {
+            width = _miniScaleFactor * 1024;
+            height = _miniScaleFactor * 768-44;
+            selfFrm.size.height = 748-44;
+        }
+        else {
+            width = _miniScaleFactor * 768;
+            height = _miniScaleFactor * 1024-44;
+            selfFrm.size.height = 1004-44;
+        }
+    }
+          
+    if (_viewMode == HGPageScrollViewModeDeck) {
+        self.frame = selfFrm;
+    }
+    CGRect frm = _scrollView.frame;
+    frm.size.width = width+2*_pageMargin;
+    frm.size.height = height;
+    
+    frm.origin.x = (self.frame.size.width - frm.size.width) * 0.5;
+    frm.origin.y = (self.frame.size.height - frm.size.height) * 0.5;
+    _scrollView.frame = frm;
+    
+    _scrollView.contentSize = CGSizeMake(_numberOfPages * _scrollView.bounds.size.width, 50);
+    for (int i = 0; i < [self numberOfPages]; i++) {
+        //if (i != [self indexForSelectedPage]) {
+            HGPageView *page = [self pageAtIndex:i];
+            [self setFrameForPage:page atIndex:i];
+            /*CGRect frame = page.identityFrame;
+            frame.origin.y = - _scrollView.frame.origin.y;
+            frame.origin.x = -_scrollView.frame.origin.x + 
+            i * _scrollView.bounds.size.width;
+            // store this frame for the backward animation
+            page.identityFrame = frame; */
+        //}
+    }
+    
+    frm = _pageSelector.frame;
+    if (UIDeviceOrientationIsLandscape(orientation)) {
+        frm.origin.y = 220;
+    } else {
+        frm.origin.y = 345;
+    }
+    
+    _pageSelector.frame = frm;
+}
 
 - (void) awakeFromNib{ 
 
 	[super awakeFromNib];
-    
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didRotate:)name:UIDeviceOrientationDidChangeNotification object:nil];
     // release IB reference (we do not want to keep a circular reference to our delegate & dataSource, or it will prevent them from properly deallocating). 
     [_delegate release];
     [_dataSource release];
@@ -338,9 +463,55 @@ typedef enum{
     // When a page is presented in HGPageScrollViewModePage mode, it is scaled up and is moved to a different superview. 
     // As it captures the full screen, it may be cropped to fit inside its new superview's frame. 
     // So when moving it back to HGPageScrollViewModeDeck, we restore the page's proportions to prepare it to Deck mode.  
-	if (mode == HGPageScrollViewModeDeck && 
-        CGAffineTransformEqualToTransform(page.transform, CGAffineTransformIdentity)) {
+	if (mode == HGPageScrollViewModeDeck /*&& 
+        CGAffineTransformEqualToTransform(page.transform, CGAffineTransformIdentity)*/) {
+        page.transform = CGAffineTransformIdentity;
+        CGRect frm = page.identityFrame;
+        UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+        if (![self.delegate shouldAutorotateToInterfaceOrientation:orientation]) {
+            // auto rotate is off
+            orientation = _lastOrientation;
+        }
+        if (!UIDeviceOrientationIsPortrait(orientation) && !UIDeviceOrientationIsLandscape(orientation)) {
+            orientation = _lastOrientation;
+        }        
+        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+        {
+            if (UIDeviceOrientationIsLandscape(orientation)) {
+                frm.size.width = 480;
+                frm.size.height = 320-50;
+            }
+            else {
+                frm.size.width = 320;
+                frm.size.height = 480-64;
+            }
+        } else {
+            if (UIDeviceOrientationIsLandscape(orientation)) {
+                frm.size.width = 1024;
+                frm.size.height = 748-44;
+            }
+            else {
+                frm.size.width = 768;
+                frm.size.height = 1004-44;
+            }
+        }
+            
+        page.identityFrame = frm;
+        
         page.frame = page.identityFrame;
+        UIBezierPath *path = [UIBezierPath bezierPathWithRect:page.bounds];
+        page.layer.shadowPath = path.CGPath;
+            
+        if (!page.closeButton) {
+            page.closeButton = [WPHitMarginButton buttonWithType:UIButtonTypeCustom];
+            page.closeButton.frame = CGRectMake(0, 0, 29, 29);
+            [page.closeButton setImage:[UIImage imageNamed:@"closebox"] forState:UIControlStateNormal];
+            [page.closeButton setImage:[UIImage imageNamed:@"closebox_pressed"] forState:UIControlStateHighlighted];
+            page.closeButton.center = CGPointMake(0, 0);
+            [page.closeButton addTarget:self action:@selector(deleteButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
+            //page.closeButton.hidden = YES;
+        }
+        
 	}
     
 }
@@ -721,14 +892,61 @@ typedef enum{
 
 - (void) setFrameForPage : (UIView*) page atIndex : (NSInteger) index;
 {
-    page.transform = CGAffineTransformMakeScale(0.6, 0.6);;
-	CGFloat contentOffset = index * _scrollView.frame.size.width;
-	CGFloat margin = (_scrollView.frame.size.width - page.frame.size.width) / 2; 
-	CGRect frame = page.frame;
-	frame.origin.x = contentOffset + margin;
-	frame.origin.y = 0.0;
-	page.frame = frame;
+    page.transform = CGAffineTransformIdentity;
+    CGRect frm = page.frame;
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    if (![self.delegate shouldAutorotateToInterfaceOrientation:orientation]) {
+        orientation = _lastOrientation;
+    }
+    if (!UIDeviceOrientationIsPortrait(orientation) && !UIDeviceOrientationIsLandscape(orientation)) {
+        orientation = _lastOrientation;
+    }
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+    {
+        if (UIDeviceOrientationIsLandscape(orientation)) {
+            frm.size.width = 480;
+            frm.size.height = 320-50;
+        }
+        else {
+            frm.size.width = 320;
+            frm.size.height = 480-64;
+        }
+    } else {
+        if (UIDeviceOrientationIsLandscape(orientation)) {
+            frm.size.width = 1024;
+            frm.size.height = 748-44;
+        }
+        else {
+            frm.size.width = 768;
+            frm.size.height = 1004-44;
+        }
+    }
+    ((ArticleView*)page).orientation = orientation;
+    page.frame = frm;
     
+    
+    frm = ((HGPageView*)page).identityFrame;
+    frm.origin.y = - _scrollView.frame.origin.y;
+    frm.origin.x = -_scrollView.frame.origin.x + 
+    index * _scrollView.bounds.size.width;
+    // store this frame for the backward animation
+    ((HGPageView*)page).identityFrame = frm; 
+    
+    if (_viewMode == HGPageScrollViewModeDeck) {        
+            
+        page.transform = CGAffineTransformMakeScale(_miniScaleFactor, _miniScaleFactor);
+        CGFloat contentOffset = index * _scrollView.frame.size.width;
+        //CGFloat margin = (_scrollView.frame.size.width - page.frame.size.width) / 2; 
+        CGRect frame = page.frame;
+        frame.origin.x = contentOffset + _pageMargin;
+        frame.origin.y = (self.frame.size.height - frame.size.height) * 0.5 - _scrollView.frame.origin.y;
+        //frame.origin.y = 0.0;
+        page.frame = frame;
+        //((ArticleView*)page).webView.frame = CGRectMake(0, 0, 768, 1004-44);
+        
+        UIBezierPath *path = [UIBezierPath bezierPathWithRect:page.bounds];
+        page.layer.shadowPath = path.CGPath;
+    }
 }
 
 
@@ -985,7 +1203,12 @@ typedef enum{
 - (void) setNumberOfPages : (NSInteger) number 
 {
     _numberOfPages = number; 
-    _scrollView.contentSize = CGSizeMake(_numberOfPages * _scrollView.bounds.size.width, _scrollView.bounds.size.height);            
+    CGSize newSize = CGSizeMake(_numberOfPages * _scrollView.bounds.size.width, 50);    
+    /*if (newSize.width < _scrollView.contentSize.width) {
+        [_scrollView setContentOffset:CGPointMake((_numberOfPages-1) * _scrollView.bounds.size.width, 0) animated:YES];
+    }*/
+    _scrollView.contentSize = newSize;
+    
     _pageSelector.numberOfPages = _numberOfPages;      
 
 }
@@ -1035,6 +1258,9 @@ typedef enum{
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
+    if (self.isRotating) {
+        return;
+    }
 	// update the visible pages
 	[self updateVisiblePages];
 	
