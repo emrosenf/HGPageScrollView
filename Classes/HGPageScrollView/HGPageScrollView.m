@@ -311,6 +311,11 @@ typedef enum{
     //_pageDeckBackgroundView.image = [UIImage imageNamed:@"striped_bg"];
 	_pageDeckBackgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     
+    
+    _pageDeckTitleLabel.shadowOffset = CGSizeMake(0, 1);
+    _pageDeckTitleLabel.textColor = UIColorFromRGB(0xdfe1e5);
+    _pageDeckTitleLabel.shadowColor = [UIColor colorWithWhite:0.0f alpha:0.5f];
+    
 	// set tap gesture recognizer for page selection
 	UITapGestureRecognizer *recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGestureFrom:)];
 	[_scrollView addGestureRecognizer:recognizer];
@@ -363,8 +368,10 @@ typedef enum{
     }
     _newTabButton = [newTabButton retain];
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        UIBarButtonItem *newTab = [[[UIBarButtonItem alloc] initWithTitle:@"New Page" style:UIBarButtonItemStyleBordered target:self.delegate action:@selector(newTab:)] autorelease];
-        UIBarButtonItem *done = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self.delegate action:@selector(doneButton:)] autorelease];
+        
+        UIBarButtonItem *done = [[[UIBarButtonItem alloc] initWithCustomView:[[AppSettings sharedInstance] woodButtonWithText:NSLocalizedString(@"Done", @"Done") stretch:3]] autorelease];
+        [(UIButton*)done.customView addTarget:self.delegate action:@selector(closeSubordinate) forControlEvents:UIControlEventTouchUpInside];
+        
         UIBarButtonItem *flexSpace = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease];
         UIBarButtonItem *fixedSpace = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil] autorelease];
         fixedSpace.width = 5.0f;
