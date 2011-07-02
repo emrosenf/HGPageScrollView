@@ -93,7 +93,6 @@ typedef enum{
 // ------------------------------------------------------------------------------------------------------------------------------------------------------
 
 @class HGTouchView; 
-@class EGOGradientView;
 @interface HGPageScrollView : UIView <UIScrollViewDelegate, UIGestureRecognizerDelegate> {
 
 	@private
@@ -105,7 +104,7 @@ typedef enum{
 
 	IBOutlet UIView			*_pageHeaderView;
     UIView                  *_userHeaderView; 
-	IBOutlet EGOGradientView			*_pageDeckBackgroundView;
+	IBOutlet UIImageView    *_pageDeckBackgroundView;
 	
 	IBOutlet UILabel		*_pageDeckTitleLabel;
 	IBOutlet UILabel		*_pageDeckSubtitleLabel;
@@ -162,7 +161,7 @@ typedef enum{
 // Appearance
 
 @property(nonatomic,readwrite, retain) UIView *pageHeaderView;				// Shown above page view in HGPageScrollViewModePage (when a single page is selected). Hidden in HGPageScrollViewModeDeck. Default is an empty view (white/opaque background) with title/subtitle labels.
-@property(nonatomic,readwrite, retain) UIView *pageDeckBackgroundView;     // Background of the page deck (HGPageScrollViewModeDeck). Hidden in HGPageScrollViewModePage. Default takes a greyscale gradient.
+@property(nonatomic,readwrite, retain) UIImageView *pageDeckBackgroundView;     // Background of the page deck (HGPageScrollViewModeDeck). Hidden in HGPageScrollViewModePage. Default takes a greyscale gradient.
 
 @property (nonatomic, readonly)	HGPageScrollViewMode viewMode;
 

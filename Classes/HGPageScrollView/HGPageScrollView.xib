@@ -2,9 +2,9 @@
 <archive type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="7.10">
 	<data>
 		<int key="IBDocument.SystemTarget">1056</int>
-		<string key="IBDocument.SystemVersion">10J869</string>
+		<string key="IBDocument.SystemVersion">10K540</string>
 		<string key="IBDocument.InterfaceBuilderVersion">1306</string>
-		<string key="IBDocument.AppKitVersion">1038.35</string>
+		<string key="IBDocument.AppKitVersion">1038.36</string>
 		<string key="IBDocument.HIToolboxVersion">461.00</string>
 		<object class="NSMutableDictionary" key="IBDocument.PluginVersions">
 			<string key="NS.key.0">com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
@@ -513,7 +513,7 @@
 					<bool key="EncodedWithXMLCoder">YES</bool>
 					<string>UIViewController</string>
 					<string>UIResponder</string>
-					<string>EGOGradientView</string>
+					<string>UIImageView</string>
 					<string>com.apple.InterfaceBuilder.IBCocoaTouchPlugin</string>
 					<object class="NSAffineTransform">
 						<bytes key="NSTransformStruct">P4AAAL+AAAAAAAAAw8oAAA</bytes>
@@ -581,14 +581,6 @@
 			<object class="NSMutableArray" key="referencedPartialClassDescriptions">
 				<bool key="EncodedWithXMLCoder">YES</bool>
 				<object class="IBPartialClassDescription">
-					<string key="className">EGOGradientView</string>
-					<string key="superclassName">UIView</string>
-					<object class="IBClassDescriptionSource" key="sourceIdentifier">
-						<string key="majorKey">IBProjectSource</string>
-						<string key="minorKey">./Classes/EGOGradientView.h</string>
-					</object>
-				</object>
-				<object class="IBPartialClassDescription">
 					<string key="className">HGPageScrollView</string>
 					<string key="superclassName">UIView</string>
 					<object class="NSMutableDictionary" key="outlets">
@@ -610,7 +602,7 @@
 							<bool key="EncodedWithXMLCoder">YES</bool>
 							<string>id</string>
 							<string>id</string>
-							<string>UIView</string>
+							<string>UIImageView</string>
 							<string>UILabel</string>
 							<string>UILabel</string>
 							<string>UIView</string>
@@ -647,7 +639,7 @@
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">_pageDeckBackgroundView</string>
-								<string key="candidateClassName">UIView</string>
+								<string key="candidateClassName">UIImageView</string>
 							</object>
 							<object class="IBToOneOutletInfo">
 								<string key="name">_pageDeckSubtitleLabel</string>

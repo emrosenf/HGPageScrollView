@@ -24,7 +24,6 @@
 //	THE SOFTWARE.
 //
 
-#import "EGOGradientView.h"
 #import "HGPageScrollView.h"
 #import <QuartzCore/QuartzCore.h>
 #import "WPHitMarginButton.h"
@@ -308,7 +307,8 @@ typedef enum{
     
     UIColor *topColor = [UIColor colorWithRed:0.8 green:0.8 blue:0.8 alpha:1.0]; //light blue-gray
 	UIColor *bottomColor = [UIColor colorWithRed:0.4 green:0.4 blue:0.4 alpha:1.0]; //dark blue-gray
-	_pageDeckBackgroundView.colors = [NSArray arrayWithObjects:(id)[topColor CGColor], (id)[bottomColor CGColor], nil];
+	_pageDeckBackgroundView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"tile_bg"]];
+    //_pageDeckBackgroundView.image = [UIImage imageNamed:@"striped_bg"];
 	_pageDeckBackgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     
 	// set tap gesture recognizer for page selection
@@ -349,10 +349,7 @@ typedef enum{
         _toolbar.opaque = NO;
         _toolbar.backgroundColor = [UIColor clearColor];
         
-        /*UIBarButtonItem *done = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self.delegate action:@selector(doneButton:)] autorelease];
-        UIBarButtonItem *newTab = [[[UIBarButtonItem alloc] initWithTitle:@"New Page" style:UIBarButtonItemStyleBordered target:self.delegate action:@selector(newTab:)] autorelease];
-        UIBarButtonItem *flexSpace = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease];
-        [_toolbar setItems:[NSArray arrayWithObjects:newTab,flexSpace,done, nil]];*/
+        
         [self addSubview:_toolbar];
         
     }
