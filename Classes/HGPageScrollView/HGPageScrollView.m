@@ -370,7 +370,7 @@ typedef enum{
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         
         UIBarButtonItem *done = [[[UIBarButtonItem alloc] initWithCustomView:[[AppSettings sharedInstance] woodButtonWithText:NSLocalizedString(@"Done", @"Done") stretch:3]] autorelease];
-        [(UIButton*)done.customView addTarget:self.delegate action:@selector(closeSubordinate) forControlEvents:UIControlEventTouchUpInside];
+        [(UIButton*)done.customView addTarget:self.delegate action:@selector(doneButton:) forControlEvents:UIControlEventTouchUpInside];
         
         UIBarButtonItem *flexSpace = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease];
         UIBarButtonItem *fixedSpace = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil] autorelease];
