@@ -66,7 +66,8 @@
         self.closeTimer = [NSTimer scheduledTimerWithTimeInterval:0.4 target:self.superview selector:@selector(deleteButtonPressed:) userInfo:nil repeats:NO];
         NSLog(@"added %@ ", self.closeTimer);
          */
-        return nil;
+        return page.closeButton;
+        //return nil;
     }
     if ([self pointInside:point withEvent:event]) {
 		return self.receiver;
