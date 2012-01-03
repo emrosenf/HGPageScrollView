@@ -488,6 +488,9 @@ typedef enum{
         [_pageSelector setCurrentPage:index];
 
 	}
+    
+    [(ArticleView*)_selectedPage willSelectPage];
+    
     [_toolbar setHidden:YES];
 	[self setViewMode:HGPageScrollViewModePage animated:animated];
 }
