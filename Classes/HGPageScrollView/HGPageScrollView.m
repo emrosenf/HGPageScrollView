@@ -1135,11 +1135,11 @@ typedef enum{
 - (void) prepareForDataUpdate : (HGPageScrollViewUpdateMethod) method withIndexSet : (NSIndexSet*) indexes
 {
     // check if current mode allows data update
-    if(self.viewMode == HGPageScrollViewModePage){
+    /*if(self.viewMode == HGPageScrollViewModePage){
         // deleting pages is (currently) only supported in DECK mode.
         NSException *exception = [NSException exceptionWithName:kExceptionNameInvalidOperation reason:kExceptionReasonInvalidOperation userInfo:nil];
         [exception raise];
-    }
+    }*/
 
     // check number of pages
     if ([self.dataSource respondsToSelector:@selector(numberOfPagesInScrollView:)]) {
