@@ -900,6 +900,7 @@ typedef enum{
 - (HGPageView*) loadPageAtIndex : (NSInteger) index insertIntoVisibleIndex : (NSInteger) visibleIndex
 {
 	HGPageView *visiblePage = [self.dataSource pageScrollView:self viewForPageAtIndex:index];
+    if (!visiblePage) return nil;
 	if (visiblePage.reuseIdentifier) {
 		NSMutableArray *reusables = [_reusablePages objectForKey:visiblePage.reuseIdentifier];
 		if (!reusables) {
