@@ -62,6 +62,10 @@ typedef enum{
 @protocol HGPageScrollViewDelegate<NSObject, UIScrollViewDelegate>
 
 @optional
+- (void) addNewTab:(id)sender;
+
+- (BOOL) shouldAutorotateToInterfaceOrientation:(UIDeviceOrientation)orientation;
+- (void) removePageAtIndex:(NSInteger)index;
 
 // Dragging
 - (void) pageScrollViewWillBeginDragging:(HGPageScrollView *)scrollView;
@@ -99,8 +103,8 @@ typedef enum{
 	
 	HGPageScrollViewMode _viewMode;
 
-	IBOutlet id <HGPageScrollViewDelegate>  _delegate;
-	IBOutlet id <HGPageScrollViewDataSource>  _dataSource;
+	IBOutlet id <HGPageScrollViewDelegate>  __unsafe_unretained _delegate;
+	IBOutlet id <HGPageScrollViewDataSource>  __unsafe_unretained _dataSource;
 
 	IBOutlet UIView			*_pageHeaderView;
     UIView                  *_userHeaderView; 
@@ -137,9 +141,9 @@ typedef enum{
     UIBarButtonItem         *_newTabButton;
 }
 
-@property (nonatomic, retain)   UIBarButtonItem *newTabButton;
-@property(nonatomic,assign)   id <HGPageScrollViewDataSource> dataSource;
-@property(nonatomic,assign)   id <HGPageScrollViewDelegate>   delegate;
+@property (nonatomic, strong)   UIBarButtonItem *addTabButton;
+@property(nonatomic,unsafe_unretained)   id <HGPageScrollViewDataSource> dataSource;
+@property(nonatomic,unsafe_unretained)   id <HGPageScrollViewDelegate>   delegate;
 
 // Info 
 
@@ -160,8 +164,8 @@ typedef enum{
 
 // Appearance
 
-@property(nonatomic,readwrite, retain) UIView *pageHeaderView;				// Shown above page view in HGPageScrollViewModePage (when a single page is selected). Hidden in HGPageScrollViewModeDeck. Default is an empty view (white/opaque background) with title/subtitle labels.
-@property(nonatomic,readwrite, retain) UIImageView *pageDeckBackgroundView;     // Background of the page deck (HGPageScrollViewModeDeck). Hidden in HGPageScrollViewModePage. Default takes a greyscale gradient.
+@property(nonatomic,readwrite, strong) UIView *pageHeaderView;				// Shown above page view in HGPageScrollViewModePage (when a single page is selected). Hidden in HGPageScrollViewModeDeck. Default is an empty view (white/opaque background) with title/subtitle labels.
+@property(nonatomic,readwrite, strong) UIImageView *pageDeckBackgroundView;     // Background of the page deck (HGPageScrollViewModeDeck). Hidden in HGPageScrollViewModePage. Default takes a greyscale gradient.
 
 @property (nonatomic, readonly)	HGPageScrollViewMode viewMode;
 
@@ -188,6 +192,9 @@ typedef enum{
 
 - (void)reloadPagesAtIndexes:(NSIndexSet *)indexes;
 
-
+- (void)handleTapGestureFrom:(UITapGestureRecognizer *)recognizer;
+- (void) layoutDeck;
+- (void) selectPageAfterDelay:(NSTimeInterval)delay;
+- (void) setViewMode:(HGPageScrollViewMode)mode animated:(BOOL)animated;
 
 @end

@@ -38,8 +38,8 @@
 @interface HGTouchView : UIView {
     NSTimer *_closeTimer;
 }
-@property (nonatomic, retain) UIView *receiver;
-@property (nonatomic, retain) NSTimer *closeTimer;
+@property (nonatomic, strong) UIView *receiver;
+@property (nonatomic, strong) NSTimer *closeTimer;
 @end
 
 
@@ -48,10 +48,6 @@
 
 @synthesize receiver;
 @synthesize closeTimer = _closeTimer;
-- (void)dealloc {
-	self.receiver = nil;
-    [super dealloc];
-}
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     HGPageView *page = [((HGPageScrollView*)self.superview) pageAtIndex:[((HGPageScrollView*)self.superview) indexForSelectedPage]];
@@ -117,9 +113,9 @@ typedef enum{
 // responding to actions 
 - (void) didChangePageValue : (id) sender;
 
-@property (nonatomic, retain) NSIndexSet *indexesBeforeVisibleRange; 
-@property (nonatomic, retain) NSIndexSet *indexesWithinVisibleRange; 
-@property (nonatomic, retain) NSIndexSet *indexesAfterVisibleRange; 
+@property (nonatomic, strong) NSIndexSet *indexesBeforeVisibleRange; 
+@property (nonatomic, strong) NSIndexSet *indexesWithinVisibleRange; 
+@property (nonatomic, strong) NSIndexSet *indexesAfterVisibleRange; 
 
 @end
 
@@ -155,7 +151,7 @@ typedef enum{
 
 @synthesize isRotating;
 
-@synthesize newTabButton = _newTabButton;
+@synthesize addTabButton = _newTabButton;
 
 
 - (void) didRotate:(NSNotification*)notification {
@@ -170,7 +166,7 @@ typedef enum{
     }
     _lastOrientation = orientation;
     BOOL value;
-	id key = [[AppSettings sharedInstance] getKey:@"rotationLock"];
+	id key = DefaultsGet(@"rotationLock");
 	if (!key)
 		value = NO;
 	else {
@@ -183,7 +179,7 @@ typedef enum{
             [_visiblePages addObject:_selectedPage];
             [self addSubview:_selectedPage];
         }
-        [_selectedPage didRotate:nil];
+        [(ArticleView*)_selectedPage didRotate:nil];
             /*CGRect frm = self.frame;
             frm.size.height = _selectedPage.frame.size.height;
             self.frame = frm;*/
@@ -285,8 +281,6 @@ typedef enum{
 	[super awakeFromNib];
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didRotate:)name:UIDeviceOrientationDidChangeNotification object:nil];
     // release IB reference (we do not want to keep a circular reference to our delegate & dataSource, or it will prevent them from properly deallocating). 
-    [_delegate release];
-    [_dataSource release];
 	
 	// init internal data structures
 	_visiblePages = [[NSMutableArray alloc] initWithCapacity:3];
@@ -321,7 +315,6 @@ typedef enum{
 	UITapGestureRecognizer *recognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(handleTapGestureFrom:)];
 	[_scrollView addGestureRecognizer:recognizer];
 	recognizer.delegate = self;
-	[recognizer release];
 	
 	// setup scrollView
 	_scrollView.decelerationRate = 1.0;//UIScrollViewDecelerationRateNormal;
@@ -363,18 +356,18 @@ typedef enum{
 
 }
 
-- (void) setNewTabButton:(UIBarButtonItem *)newTabButton {
+- (void) setAddTabButton:(UIBarButtonItem *)newTabButton {
     if (_newTabButton) {
-        [_newTabButton release]; _newTabButton = nil;
+         _newTabButton = nil;
     }
-    _newTabButton = [newTabButton retain];
+    _newTabButton = newTabButton;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         
-        UIBarButtonItem *done = [[[UIBarButtonItem alloc] initWithCustomView:[[AppSettings sharedInstance] woodButtonWithText:NSLocalizedString(@"Done", @"Done") stretch:3]] autorelease];
+        UIBarButtonItem *done = [[UIBarButtonItem alloc] initWithCustomView:[AppSettings woodButtonWithText:NSLocalizedString(@"Done", @"Done") stretch:3]];
         [(UIButton*)done.customView addTarget:self.delegate action:@selector(doneButton:) forControlEvents:UIControlEventTouchUpInside];
         
-        UIBarButtonItem *flexSpace = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil] autorelease];
-        UIBarButtonItem *fixedSpace = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil] autorelease];
+        UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
+        UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
         fixedSpace.width = 5.0f;
         [_toolbar setItems:[NSArray arrayWithObjects:fixedSpace,_newTabButton,flexSpace,done,fixedSpace, nil]];
     }
@@ -385,13 +378,9 @@ typedef enum{
 
 - (void)dealloc 
 {
-	[_visiblePages release];
 	_visiblePages = nil;
-    [_deletedPages release];
     _deletedPages = nil;
-	[_reusablePages release];
 	_reusablePages = nil;
-    [super dealloc];
 }
 
 
@@ -545,7 +534,7 @@ typedef enum{
     [self.delegate removePageAtIndex:[self indexForSelectedPage]];
     [self deletePagesAtIndexes:[NSIndexSet indexSetWithIndex:[self indexForSelectedPage]] animated:YES];
     if ([self numberOfPages] == 0) {
-        [self.delegate newTab:self];
+        [self.delegate addNewTab:self];
     }
     if ([self numberOfPages] == 1) {
         [self selectPageAfterDelay:0.3];
@@ -644,171 +633,179 @@ typedef enum{
     
 
 
-	void (^SelectBlock)(void) = (mode==HGPageScrollViewModePage)? ^{
+	void (^SelectBlock)(void) = nil;
+    
+    if (mode==HGPageScrollViewModePage)
+        SelectBlock = ^{
 		
-        [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
+            [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
 
-        UIView *headerView = _pageHeaderView;
-        
-		// move to HGPageScrollViewModePage
-		if([self.delegate respondsToSelector:@selector(pageScrollView:willSelectPageAtIndex:)]) {
-			[self.delegate pageScrollView:self willSelectPageAtIndex:selectedIndex];
-		}				
-		[_scrollView bringSubviewToFront:_selectedPage];
-		if ([self.dataSource respondsToSelector:@selector(pageScrollView:headerViewForPageAtIndex:)]) {
-            UIView *altHeaderView = [self.dataSource pageScrollView:self headerViewForPageAtIndex:selectedIndex];
-            [_userHeaderView removeFromSuperview];
-            [_userHeaderView release];
-            _userHeaderView = nil;
-           if (altHeaderView) {
-               //use the header view initialized by the dataSource 
-               _pageHeaderView.hidden = YES; 
-               _userHeaderView = [altHeaderView retain];
-               CGRect frame = _userHeaderView.frame;
-               frame.origin.y = 0;
-               _userHeaderView.frame = frame; 
-               headerView = _userHeaderView;
-               [self addSubview : _userHeaderView];
+            UIView *headerView = _pageHeaderView;
+            
+            // move to HGPageScrollViewModePage
+            if([self.delegate respondsToSelector:@selector(pageScrollView:willSelectPageAtIndex:)]) {
+                [self.delegate pageScrollView:self willSelectPageAtIndex:selectedIndex];
+            }				
+            [_scrollView bringSubviewToFront:_selectedPage];
+            if ([self.dataSource respondsToSelector:@selector(pageScrollView:headerViewForPageAtIndex:)]) {
+                UIView *altHeaderView = [self.dataSource pageScrollView:self headerViewForPageAtIndex:selectedIndex];
+                [_userHeaderView removeFromSuperview];
+                _userHeaderView = nil;
+               if (altHeaderView) {
+                   //use the header view initialized by the dataSource 
+                   _pageHeaderView.hidden = YES; 
+                   _userHeaderView = altHeaderView;
+                   CGRect frame = _userHeaderView.frame;
+                   frame.origin.y = 0;
+                   _userHeaderView.frame = frame; 
+                   headerView = _userHeaderView;
+                   [self addSubview : _userHeaderView];
+                }
+                else{
+                    _pageHeaderView.hidden = NO; 
+                    [self initHeaderForPageAtIndex:selectedIndex];
+                }
             }
-            else{
+            else { //use the default header view
                 _pageHeaderView.hidden = NO; 
-                [self initHeaderForPageAtIndex:selectedIndex];
+                [self initHeaderForPageAtIndex:selectedIndex]; 
             }
-		}
-		else { //use the default header view
-            _pageHeaderView.hidden = NO; 
-			[self initHeaderForPageAtIndex:selectedIndex]; 
-		}
 
-		// scale the page up to it 1:1 (identity) scale
-		_selectedPage.transform = CGAffineTransformIdentity; 
-		        
-        // adjust the frame
-        CGRect frame = _selectedPage.frame;
-        if (!CGRectEqualToRect(CGRectZero, frame)) {
-        frame.origin.y = headerView.frame.size.height - _scrollView.frame.origin.y;
-        frame.origin.x = -_scrollView.frame.origin.x + 
-            [self indexForSelectedPage] * _scrollView.bounds.size.width;
-        // store this frame for the backward animation
-        _selectedPage.identityFrame = frame; 
-
-        // finally crop frame to fit inside new superview (see CompletionBlock) 
-		frame.size.height = self.frame.size.height - headerView.frame.size.height;
-        
-		_selectedPage.frame = frame;
-        }
-
-		
-		// reveal the page header view
-		headerView.alpha = 1.0;
-		
-		//remove unnecessary views
-		[_scrollViewTouch removeFromSuperview];
-		[_pageSelectorTouch removeFromSuperview];
-        
-        if (_selectedPage.closeButton) {
-            [_selectedPage.closeButton removeFromSuperview];
-        }
-	} : ^{
-		
-        [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
-
-        UIView *headerView = _userHeaderView?_userHeaderView:_pageHeaderView;
-        
-		// move to HGPageScrollViewModeDeck
-		_pageSelector.hidden = NO;
-		_pageDeckTitleLabel.hidden = NO;
-		_pageDeckSubtitleLabel.hidden = NO;
-		[self initDeckTitlesForPageAtIndex:selectedIndex];
-		
-        // add the page back to the scrollView and transform it
-        [_scrollView addSubview:_selectedPage];
-        CGRect frame = _selectedPage.frame;
-        if (frame.size.width == 480) 
-            frame.size.height = 320-50;
-        _selectedPage.frame = frame;
-		_selectedPage.transform = CGAffineTransformMakeScale(_miniScaleFactor-0.1f, _miniScaleFactor-0.1f);	
-        frame = _selectedPage.frame;
-        //frame.origin.y = 0;
-        frame.origin.y = (self.frame.size.height - frame.size.height) * 0.5 - _scrollView.frame.origin.y;
-        frame.origin.x = (self.frame.size.width - frame.size.width) * 0.5 - _scrollView.frame.origin.x 
-        + [self indexForSelectedPage] * _scrollView.bounds.size.width;
-        _selectedPage.frame = frame;
-        _selectedPage.closeButton.hidden = YES;
-        _selectedPage.closeButton.center = frame.origin;
-        
-        // hide the page header view
-        headerView.alpha = 0.0;	
-        
-        
-        // notify the delegate
-		if ([self.delegate respondsToSelector:@selector(pageScrollView:willDeselectPageAtIndex:)]) {
-			[self.delegate pageScrollView:self willDeselectPageAtIndex:selectedIndex];
-		}		
-	};
-	
-	void (^CompletionBlock)(BOOL) = (mode==HGPageScrollViewModePage)? ^(BOOL finished){
-
-        [[UIApplication sharedApplication] endIgnoringInteractionEvents];
-
-        UIView *headerView = _userHeaderView?_userHeaderView:_pageHeaderView;
-
-        // set flags
-		_pageDeckTitleLabel.hidden = YES;
-		_pageDeckSubtitleLabel.hidden = YES;
-		_pageSelector.hidden = YES;
-        _scrollView.scrollEnabled = NO;
-		_selectedPage.alpha = 1.0;
-		// copy _selectedPage up in the view hierarchy, to allow touch events on its entire frame 
-		_selectedPage.frame = CGRectMake(0, headerView.frame.size.height, self.frame.size.width, self.frame.size.height);
-		[self addSubview:_selectedPage];
-        UIWebView *webView = [_selectedPage webView];
-        for (UIView *view in [webView subviews]) {
-            if ([view isKindOfClass:[UIScrollView class]]) {
-                ((UIScrollView*)view).scrollsToTop = YES;
-                break;
-            }
-        }
-		// notify delegate
-		if ([self.delegate respondsToSelector:@selector(pageScrollView:didSelectPageAtIndex:)]) {
-			[self.delegate pageScrollView:self didSelectPageAtIndex:selectedIndex];
-		}		
-	} : ^(BOOL finished){
-
-        [UIView animateWithDuration:0.1 animations:^(void) {
-            CGRect oldFrame = _selectedPage.frame;
-            _selectedPage.transform = CGAffineTransformMakeScale(_miniScaleFactor, _miniScaleFactor);	
+            // scale the page up to it 1:1 (identity) scale
+            _selectedPage.transform = CGAffineTransformIdentity; 
+                    
+            // adjust the frame
             CGRect frame = _selectedPage.frame;
+            if (!CGRectEqualToRect(CGRectZero, frame)) {
+            frame.origin.y = headerView.frame.size.height - _scrollView.frame.origin.y;
+            frame.origin.x = -_scrollView.frame.origin.x + 
+                [self indexForSelectedPage] * _scrollView.bounds.size.width;
+            // store this frame for the backward animation
+            _selectedPage.identityFrame = frame; 
+
+            // finally crop frame to fit inside new superview (see CompletionBlock) 
+            frame.size.height = self.frame.size.height - headerView.frame.size.height;
+            
+            _selectedPage.frame = frame;
+            }
+
+            
+            // reveal the page header view
+            headerView.alpha = 1.0;
+            
+            //remove unnecessary views
+            [_scrollViewTouch removeFromSuperview];
+            [_pageSelectorTouch removeFromSuperview];
+            
+            if (_selectedPage.closeButton) {
+                [_selectedPage.closeButton removeFromSuperview];
+            }
+        };
+    else
+        SelectBlock = ^{
+		
+            [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
+
+            UIView *headerView = _userHeaderView?_userHeaderView:_pageHeaderView;
+            
+            // move to HGPageScrollViewModeDeck
+            _pageSelector.hidden = NO;
+            _pageDeckTitleLabel.hidden = NO;
+            _pageDeckSubtitleLabel.hidden = NO;
+            [self initDeckTitlesForPageAtIndex:selectedIndex];
+            
+            // add the page back to the scrollView and transform it
+            [_scrollView addSubview:_selectedPage];
+            CGRect frame = _selectedPage.frame;
+            if (frame.size.width == 480) 
+                frame.size.height = 320-50;
+            _selectedPage.frame = frame;
+            _selectedPage.transform = CGAffineTransformMakeScale(_miniScaleFactor-0.1f, _miniScaleFactor-0.1f);	
+            frame = _selectedPage.frame;
+            //frame.origin.y = 0;
             frame.origin.y = (self.frame.size.height - frame.size.height) * 0.5 - _scrollView.frame.origin.y;
             frame.origin.x = (self.frame.size.width - frame.size.width) * 0.5 - _scrollView.frame.origin.x 
-                + [self indexForSelectedPage] * _scrollView.bounds.size.width;
-            //frame.origin.x = (oldFrame.size.width - frame.size.width) * 0.5;
+            + [self indexForSelectedPage] * _scrollView.bounds.size.width;
             _selectedPage.frame = frame;
-        } completion:^(BOOL finished) {
+            _selectedPage.closeButton.hidden = YES;
+            _selectedPage.closeButton.center = frame.origin;
+            
+            // hide the page header view
+            headerView.alpha = 0.0;	
+            
+            
+            // notify the delegate
+            if ([self.delegate respondsToSelector:@selector(pageScrollView:willDeselectPageAtIndex:)]) {
+                [self.delegate pageScrollView:self willDeselectPageAtIndex:selectedIndex];
+            }		
+        };
+	
+	void (^CompletionBlock)(BOOL) = nil;
+    if (mode==HGPageScrollViewModePage)
+        CompletionBlock = ^(BOOL finished){
+
             [[UIApplication sharedApplication] endIgnoringInteractionEvents];
-            
-            _scrollView.scrollEnabled = YES;				
-            //_scrollView.frame = CGRectMake(0, _scrollViewTouch.frame.origin.y, self.frame.size.width, _scrollViewTouch.frame.size.height);
-            _selectedPage.closeButton.center = _selectedPage.frame.origin;
-            _selectedPage.closeButton.hidden = NO;
-            [_scrollView addSubview:_selectedPage.closeButton];
-            [self addSubview:_scrollViewTouch];
-            [self addSubview: _pageSelectorTouch];
-            if ([self.delegate respondsToSelector:@selector(pageScrollView:didDeselectPageAtIndex:)]) {
-                [self.delegate pageScrollView:self didDeselectPageAtIndex:selectedIndex];
-            }
-            
-            UIWebView *webView = [_selectedPage webView];
+
+            UIView *headerView = _userHeaderView?_userHeaderView:_pageHeaderView;
+
+            // set flags
+            _pageDeckTitleLabel.hidden = YES;
+            _pageDeckSubtitleLabel.hidden = YES;
+            _pageSelector.hidden = YES;
+            _scrollView.scrollEnabled = NO;
+            _selectedPage.alpha = 1.0;
+            // copy _selectedPage up in the view hierarchy, to allow touch events on its entire frame 
+            _selectedPage.frame = CGRectMake(0, headerView.frame.size.height, self.frame.size.width, self.frame.size.height);
+            [self addSubview:_selectedPage];
+            UIWebView *webView = [(ArticleView*)_selectedPage webView];
             for (UIView *view in [webView subviews]) {
                 if ([view isKindOfClass:[UIScrollView class]]) {
-                    ((UIScrollView*)view).scrollsToTop = NO;
+                    ((UIScrollView*)view).scrollsToTop = YES;
                     break;
                 }
             }
-            [self bringSubviewToFront:_toolbar];
-        }];
-        		
-	};
+            // notify delegate
+            if ([self.delegate respondsToSelector:@selector(pageScrollView:didSelectPageAtIndex:)]) {
+                [self.delegate pageScrollView:self didSelectPageAtIndex:selectedIndex];
+            }		
+        };
+    else 
+        CompletionBlock = ^(BOOL finished){
+
+            [UIView animateWithDuration:0.1 animations:^(void) {
+                CGRect oldFrame = _selectedPage.frame;
+                _selectedPage.transform = CGAffineTransformMakeScale(_miniScaleFactor, _miniScaleFactor);	
+                CGRect frame = _selectedPage.frame;
+                frame.origin.y = (self.frame.size.height - frame.size.height) * 0.5 - _scrollView.frame.origin.y;
+                frame.origin.x = (self.frame.size.width - frame.size.width) * 0.5 - _scrollView.frame.origin.x 
+                    + [self indexForSelectedPage] * _scrollView.bounds.size.width;
+                //frame.origin.x = (oldFrame.size.width - frame.size.width) * 0.5;
+                _selectedPage.frame = frame;
+            } completion:^(BOOL finished) {
+                [[UIApplication sharedApplication] endIgnoringInteractionEvents];
+                
+                _scrollView.scrollEnabled = YES;				
+                //_scrollView.frame = CGRectMake(0, _scrollViewTouch.frame.origin.y, self.frame.size.width, _scrollViewTouch.frame.size.height);
+                _selectedPage.closeButton.center = _selectedPage.frame.origin;
+                _selectedPage.closeButton.hidden = NO;
+                [_scrollView addSubview:_selectedPage.closeButton];
+                [self addSubview:_scrollViewTouch];
+                [self addSubview: _pageSelectorTouch];
+                if ([self.delegate respondsToSelector:@selector(pageScrollView:didDeselectPageAtIndex:)]) {
+                    [self.delegate pageScrollView:self didDeselectPageAtIndex:selectedIndex];
+                }
+                
+                UIWebView *webView = [(ArticleView*)_selectedPage webView];
+                for (UIView *view in [webView subviews]) {
+                    if ([view isKindOfClass:[UIScrollView class]]) {
+                        ((UIScrollView*)view).scrollsToTop = NO;
+                        break;
+                    }
+                }
+                [self bringSubviewToFront:_toolbar];
+            }];
+                    
+        };
 	
 	
 	if(animated){
@@ -906,7 +903,7 @@ typedef enum{
 	if (visiblePage.reuseIdentifier) {
 		NSMutableArray *reusables = [_reusablePages objectForKey:visiblePage.reuseIdentifier];
 		if (!reusables) {
-			reusables = [[[NSMutableArray alloc] initWithCapacity : 4] autorelease];
+			reusables = [[NSMutableArray alloc] initWithCapacity : 4];
 		}
 		if (![reusables containsObject:visiblePage]) {
 			[reusables addObject:visiblePage];
@@ -1262,7 +1259,7 @@ typedef enum{
         // in order to shift pages backwards and trim the content size, the WIDTH of each deleted page needs to be known. 
         // We don't have an instance of the deleted pages and we cannot ask the data source to provide them because they've already been deleted. As a temp solution we take the default page width of 320. 
         // This assumption may be wrong if the data source uses anotehr page width or alternatively varying page widths.   
-        UIView *pseudoPage = [[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)] autorelease];
+        UIView *pseudoPage = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
         [self setFrameForPage:pseudoPage atIndex:idx];
         [_deletedPages addObject:pseudoPage];
         _visibleIndexes.location--;
