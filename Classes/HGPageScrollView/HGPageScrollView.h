@@ -62,6 +62,7 @@ typedef enum{
 @protocol HGPageScrollViewDelegate<NSObject, UIScrollViewDelegate>
 
 @optional
+
 - (void) addNewTab:(id)sender;
 
 - (BOOL) shouldAutorotateToInterfaceOrientation:(UIDeviceOrientation)orientation;

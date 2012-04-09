@@ -155,8 +155,8 @@ typedef enum{
 
 
 - (void) didRotate:(NSNotification*)notification {
-    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
-    if (!UIDeviceOrientationIsPortrait(orientation) && !UIDeviceOrientationIsLandscape(orientation)) {
+    UIInterfaceOrientation orientation = [[UIDevice currentDevice] orientation];
+    if (!UIInterfaceOrientationIsPortrait(orientation) && !UIInterfaceOrientationIsLandscape(orientation)) {
         
         return;
     }
@@ -173,7 +173,7 @@ typedef enum{
 		value = [key boolValue];
 	}
 	if (value) return;
-
+    if (!_selectedPage) return;
     if (_viewMode == HGPageScrollViewModePage) {
         if (!_selectedPage.superview) {
             [_visiblePages addObject:_selectedPage];
@@ -203,18 +203,18 @@ typedef enum{
     CGRect selfFrm = self.frame;
     CGFloat width = 0.0f;
     CGFloat height = 0.0f;
-    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    UIInterfaceOrientation orientation = [[UIDevice currentDevice] orientation];
     
     if (![self.delegate shouldAutorotateToInterfaceOrientation:orientation]) {
         // auto rotate is off
         orientation = _lastOrientation;
     }
-    if (!UIDeviceOrientationIsPortrait(orientation) && !UIDeviceOrientationIsLandscape(orientation)) {
+    if (!UIInterfaceOrientationIsPortrait(orientation) && !UIInterfaceOrientationIsLandscape(orientation)) {
         orientation = _lastOrientation;
     }
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
     {
-        if (UIDeviceOrientationIsLandscape(orientation)) {
+        if (UIInterfaceOrientationIsLandscape(orientation)) {
             width = _miniScaleFactor * 480;
             height = _miniScaleFactor * 270;
             selfFrm.size.height = 270;
@@ -229,7 +229,7 @@ typedef enum{
 #endif
         }
     } else {
-        if (UIDeviceOrientationIsLandscape(orientation)) {
+        if (UIInterfaceOrientationIsLandscape(orientation)) {
             width = _miniScaleFactor * 1024;
             height = _miniScaleFactor * 768-44;
             selfFrm.size.height = 748-44;
@@ -267,7 +267,7 @@ typedef enum{
     }
     
     frm = _pageSelector.frame;
-    if (UIDeviceOrientationIsLandscape(orientation)) {
+    if (UIInterfaceOrientationIsLandscape(orientation)) {
         frm.origin.y = 220;
     } else {
         frm.origin.y = 345;
@@ -300,9 +300,7 @@ typedef enum{
     _scrollView.backgroundColor = [UIColor clearColor];
     _scrollView.scrollsToTop = NO;
     
-    UIColor *topColor = [UIColor colorWithRed:0.8 green:0.8 blue:0.8 alpha:1.0]; //light blue-gray
-	UIColor *bottomColor = [UIColor colorWithRed:0.4 green:0.4 blue:0.4 alpha:1.0]; //dark blue-gray
-	_pageDeckBackgroundView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"tile_bg"]];
+    _pageDeckBackgroundView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"tile_bg"]];
     //_pageDeckBackgroundView.image = [UIImage imageNamed:@"striped_bg"];
 	_pageDeckBackgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     
@@ -565,17 +563,17 @@ typedef enum{
         CGAffineTransformEqualToTransform(page.transform, CGAffineTransformIdentity)*/) {
         page.transform = CGAffineTransformIdentity;
         CGRect frm = page.identityFrame;
-        UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+        UIInterfaceOrientation orientation = [[UIDevice currentDevice] orientation];
         if (![self.delegate shouldAutorotateToInterfaceOrientation:orientation]) {
             // auto rotate is off
             orientation = _lastOrientation;
         }
-        if (!UIDeviceOrientationIsPortrait(orientation) && !UIDeviceOrientationIsLandscape(orientation)) {
+        if (!UIInterfaceOrientationIsPortrait(orientation) && !UIInterfaceOrientationIsLandscape(orientation)) {
             orientation = _lastOrientation;
         }        
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
         {
-            if (UIDeviceOrientationIsLandscape(orientation)) {
+            if (UIInterfaceOrientationIsLandscape(orientation)) {
                 frm.size.width = 480;
                 frm.size.height = 320-50;
             }
@@ -584,7 +582,7 @@ typedef enum{
                 frm.size.height = 480-64;
             }
         } else {
-            if (UIDeviceOrientationIsLandscape(orientation)) {
+            if (UIInterfaceOrientationIsLandscape(orientation)) {
                 frm.size.width = 1024;
                 frm.size.height = 748-44;
             }
@@ -1036,7 +1034,9 @@ typedef enum{
             // replace selected page with the new page which is in the same offset 
             newSelectedPage = [[_scrollView subviews] objectAtIndex:index];
         }
-        else{
+        
+        // This could happen when removing the last page
+        if([self indexForVisiblePage:newSelectedPage] == NSNotFound) {
             // replace selected page with last visible page 
             newSelectedPage = [_visiblePages lastObject];
         }        
@@ -1064,16 +1064,16 @@ typedef enum{
 {
     page.transform = CGAffineTransformIdentity;
     CGRect frm = page.frame;
-    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
+    UIInterfaceOrientation orientation = self.window.rootViewController.interfaceOrientation;
     if (![self.delegate shouldAutorotateToInterfaceOrientation:orientation]) {
         orientation = _lastOrientation;
     }
-    if (!UIDeviceOrientationIsPortrait(orientation) && !UIDeviceOrientationIsLandscape(orientation)) {
+    if (!UIInterfaceOrientationIsPortrait(orientation) && !UIInterfaceOrientationIsLandscape(orientation)) {
         orientation = _lastOrientation;
     }
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
     {
-        if (UIDeviceOrientationIsLandscape(orientation)) {
+        if (UIInterfaceOrientationIsLandscape(orientation)) {
             frm.size.width = 480;
             frm.size.height = 320-50;
         }
@@ -1082,7 +1082,7 @@ typedef enum{
             frm.size.height = 480-64;
         }
     } else {
-        if (UIDeviceOrientationIsLandscape(orientation)) {
+        if (UIInterfaceOrientationIsLandscape(orientation)) {
             frm.size.width = 1024;
             frm.size.height = 748-44;
         }
@@ -1091,7 +1091,6 @@ typedef enum{
             frm.size.height = 1004-44;
         }
     }
-    ((ArticleView*)page).orientation = orientation;
     page.frame = frm;
     
     
@@ -1336,6 +1335,7 @@ typedef enum{
     }
     
     
+    /* OLD
     // remove the pages marked for deletion from visiblePages 
     [_visiblePages removeObjectsInArray:_deletedPages];
     // ...and from the scrollView
@@ -1345,6 +1345,33 @@ typedef enum{
     [self setNumberOfPages:numPagesAfterDeletion];
     
     [_deletedPages removeAllObjects];
+    
+    [self scrollViewDidScroll:_scrollView];
+    */
+    
+    
+    
+    // Temporarily update number of pages.
+	_numberOfPages = numPagesAfterDeletion;
+	// remove the pages marked for deletion from visiblePages 
+	[_visiblePages removeObjectsInArray:_deletedPages];
+	// ...and from the scrollView
+	[self removePagesFromScrollView:_deletedPages animated:animated];
+	// Actually update number of pages
+	if (animated) {
+		[UIView animateWithDuration:0.4 animations:^(void) {
+			[self setNumberOfPages:numPagesAfterDeletion];
+		}];
+	} else {
+		[self setNumberOfPages:numPagesAfterDeletion];
+	}
+    
+    
+    [_deletedPages removeAllObjects];
+    
+	// Update selected page.
+	[self scrollViewDidScroll:_scrollView];
+    
     
     // for indexes after the visible range, only adjust the scrollView contentSize
 //    if ([self.indexesAfterVisibleRange count] > 0) {
@@ -1575,7 +1602,6 @@ typedef enum{
 	CGFloat alpha = 1.0 - fabs(delta/step);
 	if(alpha > 0.95) alpha = 1.0;
     page.alpha = alpha;
-
 }
 
 
