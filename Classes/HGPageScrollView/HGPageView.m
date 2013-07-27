@@ -52,7 +52,9 @@
 */
 
 
-
+- (void)prepareForDeletion {
+    
+}
 
 - (void)prepareForReuse;
 {
