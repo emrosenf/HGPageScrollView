@@ -741,12 +741,8 @@ typedef enum{
             _selectedPage.frame = CGRectMake(0, headerView.frame.size.height, self.frame.size.width, self.frame.size.height);
             [self addSubview:_selectedPage];
             UIWebView *webView = [(ArticleView*)_selectedPage webView];
-            for (UIView *view in [webView subviews]) {
-                if ([view isKindOfClass:[UIScrollView class]]) {
-                    ((UIScrollView*)view).scrollsToTop = YES;
-                    break;
-                }
-            }
+            webView.scrollView.scrollsToTop = YES;
+            
             // notify delegate
             if ([self.delegate respondsToSelector:@selector(pageScrollView:didSelectPageAtIndex:)]) {
                 [self.delegate pageScrollView:self didSelectPageAtIndex:selectedIndex];
@@ -778,12 +774,8 @@ typedef enum{
                 }
                 
                 UIWebView *webView = [(ArticleView*)_selectedPage webView];
-                for (UIView *view in [webView subviews]) {
-                    if ([view isKindOfClass:[UIScrollView class]]) {
-                        ((UIScrollView*)view).scrollsToTop = NO;
-                        break;
-                    }
-                }
+                webView.scrollView.scrollsToTop = NO;
+                
                 [self bringSubviewToFront:_toolbar];
             }];
                     
