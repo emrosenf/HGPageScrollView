@@ -1280,7 +1280,10 @@ typedef enum{
         [self removePagesFromScrollView:_deletedPages animated:NO]; //never animate removal of non-visible pages
         CGFloat newOffset = oldOffset - ([_deletedPages count] * _scrollView.frame.size.width);
         [_scrollView setContentOffset:CGPointMake(newOffset, _scrollView.contentOffset.y) animated:animated];
-        [_deletedPages removeAllObjects];
+
+        for (HGPageView *page in _deletedPages) {
+            [page prepareForDeletion];
+        }
     }
     
         
@@ -1367,7 +1370,9 @@ typedef enum{
 		[self setNumberOfPages:numPagesAfterDeletion];
 	}
     
-    
+    for (HGPageView *page in _deletedPages) {
+        [page prepareForDeletion];
+    }
     [_deletedPages removeAllObjects];
     
 	// Update selected page.
