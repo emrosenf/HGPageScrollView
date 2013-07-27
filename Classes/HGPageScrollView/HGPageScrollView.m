@@ -369,6 +369,7 @@ typedef enum{
 
 - (void)dealloc 
 {
+    [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
 	_visiblePages = nil;
     _deletedPages = nil;
 	_reusablePages = nil;
