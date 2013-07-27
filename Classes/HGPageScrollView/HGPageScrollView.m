@@ -147,7 +147,7 @@ typedef enum{
 
 
 - (void) didRotate:(NSNotification*)notification {
-    UIInterfaceOrientation orientation = [[UIDevice currentDevice] orientation];
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
     if (!UIInterfaceOrientationIsPortrait(orientation) && !UIInterfaceOrientationIsLandscape(orientation)) {
         
         return;
@@ -192,7 +192,7 @@ typedef enum{
     CGRect selfFrm = self.frame;
     CGFloat width = 0.0f;
     CGFloat height = 0.0f;
-    UIInterfaceOrientation orientation = [[UIDevice currentDevice] orientation];
+    UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
     
     if (![self.delegate shouldAutorotateToInterfaceOrientation:orientation]) {
         // auto rotate is off
@@ -543,7 +543,7 @@ typedef enum{
         CGAffineTransformEqualToTransform(page.transform, CGAffineTransformIdentity)*/) {
         page.transform = CGAffineTransformIdentity;
         CGRect frm = page.identityFrame;
-        UIInterfaceOrientation orientation = [[UIDevice currentDevice] orientation];
+        UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
         if (![self.delegate shouldAutorotateToInterfaceOrientation:orientation]) {
             // auto rotate is off
             orientation = _lastOrientation;
@@ -1045,7 +1045,7 @@ typedef enum{
 {
     page.transform = CGAffineTransformIdentity;
     CGRect frm = page.frame;
-    UIInterfaceOrientation orientation = self.window.rootViewController.interfaceOrientation;
+	UIDeviceOrientation orientation = [[UIDevice currentDevice] orientation];
     if (![self.delegate shouldAutorotateToInterfaceOrientation:orientation]) {
         orientation = _lastOrientation;
     }
