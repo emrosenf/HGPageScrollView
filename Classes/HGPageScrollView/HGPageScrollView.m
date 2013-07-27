@@ -203,30 +203,34 @@ typedef enum{
     }
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
     {
+		NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
+		
         if (UIInterfaceOrientationIsLandscape(orientation)) {
-            width = _miniScaleFactor * 480;
-            height = _miniScaleFactor * 270;
-            selfFrm.size.height = 270;
+            width = _miniScaleFactor * SCREEN_HEIGHT;
+            height = _miniScaleFactor * (320 - 30 - statusBar);
+            selfFrm.size.height = (320 - 30 - statusBar);
         }
         else {
+			
             width = _miniScaleFactor * 320;
-            height = _miniScaleFactor * 416;
+            height = _miniScaleFactor * (SCREEN_HEIGHT - statusBar - 44);
 #if WIKI || WIKITRAVEL
-            selfFrm.size.height = 416;
+            selfFrm.size.height = SCREEN_HEIGHT - statusBar - 44;
 #else
-            selfFrm.size.height = 460-88;
+            selfFrm.size.height = SCREEN_HEIGHT - statusBar - 88;
 #endif
         }
     } else {
         if (UIInterfaceOrientationIsLandscape(orientation)) {
-            width = _miniScaleFactor * 1024;
+            width = _miniScaleFactor * SCREEN_HEIGHT;
             height = _miniScaleFactor * 768-44;
             selfFrm.size.height = 748-44;
         }
         else {
+			NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
             width = _miniScaleFactor * 768;
-            height = _miniScaleFactor * 1024-44;
-            selfFrm.size.height = 1004-44;
+            height = _miniScaleFactor * (SCREEN_HEIGHT - 44);
+            selfFrm.size.height = (SCREEN_HEIGHT - statusBar - 44);
         }
     }
           
@@ -251,10 +255,18 @@ typedef enum{
     }
     
     frm = _pageSelector.frame;
-    if (UIInterfaceOrientationIsLandscape(orientation)) {
-        frm.origin.y = 220;
+    if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
+        if (UIInterfaceOrientationIsLandscape(orientation)) {
+            frm.origin.y = 220;
+        } else {
+            frm.origin.y = SCREEN_HEIGHT - 120;
+        }
     } else {
-        frm.origin.y = 345;
+        if (UIInterfaceOrientationIsPortrait(orientation)) {
+            frm.origin.y = SCREEN_HEIGHT - 150;
+        } else {
+            frm.origin.y = 768 - 150;
+        }
     }
     
     _pageSelector.frame = frm;
@@ -538,25 +550,26 @@ typedef enum{
         }
         if (!UIInterfaceOrientationIsPortrait(orientation) && !UIInterfaceOrientationIsLandscape(orientation)) {
             orientation = _lastOrientation;
-        }        
+        }
+		NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
         {
             if (UIInterfaceOrientationIsLandscape(orientation)) {
-                frm.size.width = 480;
-                frm.size.height = 320-50;
+                frm.size.width = SCREEN_HEIGHT;
+                frm.size.height = 320 - 30 - statusBar;
             }
             else {
                 frm.size.width = 320;
-                frm.size.height = 480-64;
+                frm.size.height = SCREEN_HEIGHT- statusBar - 44;
             }
         } else {
             if (UIInterfaceOrientationIsLandscape(orientation)) {
-                frm.size.width = 1024;
+                frm.size.width = SCREEN_HEIGHT;
                 frm.size.height = 748-44;
             }
             else {
                 frm.size.width = 768;
-                frm.size.height = 1004-44;
+                frm.size.height = SCREEN_HEIGHT - statusBar - 44;
             }
         }
             
@@ -686,8 +699,9 @@ typedef enum{
             // add the page back to the scrollView and transform it
             [_scrollView addSubview:_selectedPage];
             CGRect frame = _selectedPage.frame;
-            if (frame.size.width == 480) 
-                frame.size.height = 320-50;
+			NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
+            if (frame.size.width == SCREEN_HEIGHT && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+                frame.size.height = 320 - 30 - statusBar;
             _selectedPage.frame = frame;
             _selectedPage.transform = CGAffineTransformMakeScale(_miniScaleFactor-0.1f, _miniScaleFactor-0.1f);	
             frame = _selectedPage.frame;
@@ -742,7 +756,6 @@ typedef enum{
         CompletionBlock = ^(BOOL finished){
 
             [UIView animateWithDuration:0.1 animations:^(void) {
-                CGRect oldFrame = _selectedPage.frame;
                 _selectedPage.transform = CGAffineTransformMakeScale(_miniScaleFactor, _miniScaleFactor);	
                 CGRect frame = _selectedPage.frame;
                 frame.origin.y = (self.frame.size.height - frame.size.height) * 0.5 - _scrollView.frame.origin.y;
@@ -1039,24 +1052,25 @@ typedef enum{
     if (!UIInterfaceOrientationIsPortrait(orientation) && !UIInterfaceOrientationIsLandscape(orientation)) {
         orientation = _lastOrientation;
     }
+	NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
     {
         if (UIInterfaceOrientationIsLandscape(orientation)) {
-            frm.size.width = 480;
-            frm.size.height = 320-50;
+            frm.size.width = SCREEN_HEIGHT;
+            frm.size.height = 320 - 30 - statusBar;
         }
         else {
             frm.size.width = 320;
-            frm.size.height = 480-64;
+            frm.size.height = SCREEN_HEIGHT- statusBar - 44;
         }
     } else {
         if (UIInterfaceOrientationIsLandscape(orientation)) {
-            frm.size.width = 1024;
+            frm.size.width = SCREEN_HEIGHT;
             frm.size.height = 748-44;
         }
         else {
             frm.size.width = 768;
-            frm.size.height = 1004-44;
+            frm.size.height = SCREEN_HEIGHT - statusBar - 44;
         }
     }
     page.frame = frm;
@@ -1228,8 +1242,9 @@ typedef enum{
         //TODO: solve this limitation:
         // in order to shift pages backwards and trim the content size, the WIDTH of each deleted page needs to be known. 
         // We don't have an instance of the deleted pages and we cannot ask the data source to provide them because they've already been deleted. As a temp solution we take the default page width of 320. 
-        // This assumption may be wrong if the data source uses anotehr page width or alternatively varying page widths.   
-        UIView *pseudoPage = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 460)];
+        // This assumption may be wrong if the data source uses anotehr page width or alternatively varying page widths.
+		NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
+        UIView *pseudoPage = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, SCREEN_HEIGHT - statusBar)];
         [self setFrameForPage:pseudoPage atIndex:idx];
         [_deletedPages addObject:pseudoPage];
         _visibleIndexes.location--;
