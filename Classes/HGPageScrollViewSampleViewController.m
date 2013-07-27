@@ -332,7 +332,7 @@
 
     if (self.modalViewController) {
         MyPageData *pageData = [_myPageDataArray objectAtIndex:[pageScrollView indexForSelectedPage]];
-        [self dismissModalViewControllerAnimated:NO];
+        [self dismissViewControllerAnimated:NO completion:nil];
         // copy the toolbar items back to our own toolbar
         [toolbar setItems:[NSArray arrayWithArray : pageData.navController.topViewController.toolbarItems]];
     }
