@@ -402,12 +402,13 @@ typedef enum{
 }
 
 
-- (HGPageView *)pageAtIndex:(NSInteger)index;            // returns nil if page is not visible or the index is out of range
+- (HGPageView *)pageAtIndex:(NSInteger)index;
+// returns nil if page is not visible or the index is out of range
 {
 	if (index == NSNotFound || index < _visibleIndexes.location || index > _visibleIndexes.location + _visibleIndexes.length-1) {
 		return nil;
 	}
-	return [_visiblePages objectAtIndex:index-_visibleIndexes.location];
+	return _visiblePages[index-_visibleIndexes.location];
 }
 
 
@@ -480,7 +481,7 @@ typedef enum{
         [self reloadData];
         
         // update _selectedPage
-        _selectedPage = [_visiblePages objectAtIndex:selectedVisibleIndex];
+        _selectedPage = _visiblePages[selectedVisibleIndex];
         
         // update the page selector (pageControl)
         [_pageSelector setCurrentPage:index];
@@ -866,11 +867,11 @@ typedef enum{
 		
         if (selectedIndex == NSNotFound) {
             // if no page is selected, select the first page
-            _selectedPage = [_visiblePages objectAtIndex:0];
+            _selectedPage = _visiblePages[0];
         }
         else{
             // refresh the page at the selected index (it might have changed after reloading the visible pages) 
-            _selectedPage = [_visiblePages objectAtIndex:selectedIndex];
+            _selectedPage = _visiblePages[selectedIndex];
         }
 
         // update deck title and subtitle for selected page
@@ -903,14 +904,14 @@ typedef enum{
 	HGPageView *visiblePage = [self.dataSource pageScrollView:self viewForPageAtIndex:index];
     if (!visiblePage) return nil;
 	if (visiblePage.reuseIdentifier) {
-		NSMutableArray *reusables = [_reusablePages objectForKey:visiblePage.reuseIdentifier];
+		NSMutableArray *reusables = _reusablePages[visiblePage.reuseIdentifier];
 		if (!reusables) {
 			reusables = [[NSMutableArray alloc] initWithCapacity : 4];
 		}
 		if (![reusables containsObject:visiblePage]) {
 			[reusables addObject:visiblePage];
 		}
-		[_reusablePages setObject:reusables forKey:visiblePage.reuseIdentifier];
+		_reusablePages[visiblePage.reuseIdentifier] = reusables;
 	}
 	
 	// add the page to the visible pages array
@@ -1032,7 +1033,7 @@ typedef enum{
         HGPageView *newSelectedPage=nil;
         if (index != NSNotFound) {
             // replace selected page with the new page which is in the same offset 
-            newSelectedPage = [[_scrollView subviews] objectAtIndex:index];
+            newSelectedPage = [_scrollView subviews][index];
         }
         
         // This could happen when removing the last page
@@ -1477,7 +1478,7 @@ typedef enum{
 		if (neighborExists) {
 			
 			NSInteger neighborPageVisibleIndex = [_visiblePages indexOfObject:_selectedPage] + (delta > 0? 1:-1);
-			HGPageView *neighborPage = [_visiblePages objectAtIndex:neighborPageVisibleIndex];
+			HGPageView *neighborPage = _visiblePages[neighborPageVisibleIndex];
 			NSInteger neighborIndex = _visibleIndexes.location + neighborPageVisibleIndex;
 
 			[self updateScrolledPage:neighborPage index:neighborIndex];
@@ -1565,7 +1566,7 @@ typedef enum{
 	else if(leftViewOriginX < -pageWidth){
 		//left page is exiting the visible range
         if ([_visiblePages count] > 0) {
-            UIView *page = [_visiblePages objectAtIndex:0];
+            UIView *page = _visiblePages[0];
             [_visiblePages removeObject:page];
             [page removeFromSuperview]; //remove from the scroll view
             _visibleIndexes.location += 1;
@@ -1637,7 +1638,7 @@ typedef enum{
 - (HGPageView *)dequeueReusablePageWithIdentifier:(NSString *)identifier;  // Used by the delegate to acquire an already allocated page, instead of allocating a new one
 {
 	HGPageView *reusablePage = nil;
-	NSArray *reusables = [_reusablePages objectForKey:identifier];
+	NSArray *reusables = _reusablePages[identifier];
 	if (reusables){
 		NSEnumerator *enumerator = [reusables objectEnumerator];
 		while ((reusablePage = [enumerator nextObject])) {
