@@ -104,8 +104,8 @@ typedef enum{
 	
 	HGPageScrollViewMode _viewMode;
 
-	IBOutlet id <HGPageScrollViewDelegate>  __unsafe_unretained _delegate;
-	IBOutlet id <HGPageScrollViewDataSource>  __unsafe_unretained _dataSource;
+	IBOutlet id <HGPageScrollViewDelegate>  __weak _delegate;
+	IBOutlet id <HGPageScrollViewDataSource>  __weak _dataSource;
 
 	IBOutlet UIView			*_pageHeaderView;
     UIView                  *_userHeaderView; 
@@ -143,8 +143,8 @@ typedef enum{
 }
 
 @property (nonatomic, strong)   UIBarButtonItem *addTabButton;
-@property(nonatomic,unsafe_unretained)   id <HGPageScrollViewDataSource> dataSource;
-@property(nonatomic,unsafe_unretained)   id <HGPageScrollViewDelegate>   delegate;
+@property(nonatomic,weak)   id <HGPageScrollViewDataSource> dataSource;
+@property(nonatomic,weak)   id <HGPageScrollViewDelegate>   delegate;
 
 // Info 
 
