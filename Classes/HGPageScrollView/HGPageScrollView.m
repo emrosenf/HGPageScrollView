@@ -29,6 +29,7 @@
 #import "WPHitMarginButton.h"
 #import "ArticleView.h"
 #import "TransparentToolbar.h"
+
 // -----------------------------------------------------------------------------------------------------------------------------------
 //Internal view class, used by to HGPageScrollView.
 
@@ -54,16 +55,7 @@
     
     CGPoint convertedPoint = [self convertPoint:point toView:page.closeButton];
     if ([page.closeButton pointInside:convertedPoint withEvent:event]) {
-        /*if (self.closeTimer) {
-            NSLog(@"released %@", self.closeTimer);
-            [self.closeTimer invalidate]; 
-            self.closeTimer = nil;
-        }
-        self.closeTimer = [NSTimer scheduledTimerWithTimeInterval:0.4 target:self.superview selector:@selector(deleteButtonPressed:) userInfo:nil repeats:NO];
-        NSLog(@"added %@ ", self.closeTimer);
-         */
         return page.closeButton;
-        //return nil;
     }
     if ([self pointInside:point withEvent:event]) {
 		return self.receiver;
@@ -180,9 +172,6 @@ typedef enum{
             [self addSubview:_selectedPage];
         }
         [(ArticleView*)_selectedPage didRotate:nil];
-            /*CGRect frm = self.frame;
-            frm.size.height = _selectedPage.frame.size.height;
-            self.frame = frm;*/
     }
 
     _selectedPage.closeButton.hidden = YES;
@@ -257,12 +246,7 @@ typedef enum{
         //if (i != [self indexForSelectedPage]) {
             HGPageView *page = [self pageAtIndex:i];
             [self setFrameForPage:page atIndex:i];
-            /*CGRect frame = page.identityFrame;
-            frame.origin.y = - _scrollView.frame.origin.y;
-            frame.origin.x = -_scrollView.frame.origin.x + 
-            i * _scrollView.bounds.size.width;
-            // store this frame for the backward animation
-            page.identityFrame = frame; */
+
         //}
     }
     
@@ -301,8 +285,7 @@ typedef enum{
     _scrollView.scrollsToTop = NO;
     
     _pageDeckBackgroundView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"tile_bg"]];
-    //_pageDeckBackgroundView.image = [UIImage imageNamed:@"striped_bg"];
-	_pageDeckBackgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
+    _pageDeckBackgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     
     
     _pageDeckTitleLabel.shadowOffset = CGSizeMake(0, 1);
@@ -369,8 +352,6 @@ typedef enum{
         fixedSpace.width = 5.0f;
         [_toolbar setItems:[NSArray arrayWithObjects:fixedSpace,_newTabButton,flexSpace,done,fixedSpace, nil]];
     }
-    /*_toolbar.frame =CGRectMake(0, self.frame.size.height-44, self.frame.size.width, 44);
-    [self addSubview:_toolbar];*/
 }
 
 
@@ -379,16 +360,6 @@ typedef enum{
 	_visiblePages = nil;
     _deletedPages = nil;
 	_reusablePages = nil;
-}
-
-
-#pragma mark -
-#pragma mark View Management
-
-- (void) setFrame:(CGRect)frame
-{
-    [super setFrame:frame];
-	//_scrollView.contentSize = CGSizeMake(_numberOfPages * _scrollView.bounds.size.width, _scrollView.bounds.size.height);
 }
 
 
@@ -507,10 +478,6 @@ typedef enum{
     NSInteger selectedPageScrollIndex = [self indexForSelectedPage];
     CGRect identityFrame = _selectedPage.identityFrame;
     
-    CGRect pageFrame = _selectedPage.frame;
-    /*if (identityFrame.origin.x < 0 && identityFrame.origin.y < 0) {
-        identityFrame = pageFrame;
-    }*/
     if (_selectedPage.closeButton.superview) {
         [_selectedPage.closeButton removeFromSuperview];
     }
@@ -1112,7 +1079,6 @@ typedef enum{
         frame.origin.y = (self.frame.size.height - frame.size.height) * 0.5 - _scrollView.frame.origin.y;
         //frame.origin.y = 0.0;
         page.frame = frame;
-        //((ArticleView*)page).webView.frame = CGRectMake(0, 0, 768, 1004-44);
         
         UIBezierPath *path = [UIBezierPath bezierPathWithRect:page.bounds];
         page.layer.shadowPath = path.CGPath;
@@ -1236,7 +1202,7 @@ typedef enum{
     
     // update selected page if necessary
     if ([self.indexesWithinVisibleRange containsIndex:selectedPageIndex]) {
-        [self updateScrolledPage:[_visiblePages objectAtIndex:(selectedPageIndex-_visibleIndexes.location)] index:selectedPageIndex];
+        [self updateScrolledPage:_visiblePages[(selectedPageIndex-_visibleIndexes.location)] index:selectedPageIndex];
     }
     
     // handle insertion of pages after the visible range
