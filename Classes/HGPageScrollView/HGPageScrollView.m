@@ -188,7 +188,6 @@ typedef enum{
 }
 
 - (void) layoutDeck {
-    //if (_viewMode == HGPageScrollViewModeDeck) {
     CGRect selfFrm = self.frame;
     CGFloat width = 0.0f;
     CGFloat height = 0.0f;
@@ -234,9 +233,7 @@ typedef enum{
         }
     }
           
-    if (_viewMode == HGPageScrollViewModeDeck) {
-        self.frame = selfFrm;
-    }
+    self.frame = selfFrm;
     CGRect frm = _scrollView.frame;
     frm.size.width = width+2*_pageMargin;
     frm.size.height = height;
