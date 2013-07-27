@@ -356,13 +356,12 @@ typedef enum{
     _newTabButton = newTabButton;
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
         
-        UIBarButtonItem *done = [[UIBarButtonItem alloc] initWithCustomView:[AppSettings woodButtonWithText:NSLocalizedString(@"Done", @"Done") stretch:3]];
-        [(UIButton*)done.customView addTarget:self.delegate action:@selector(doneButton:) forControlEvents:UIControlEventTouchUpInside];
+        UIBarButtonItem *done = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self.delegate action:@selector(doneButton:)];
         
         UIBarButtonItem *flexSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFlexibleSpace target:nil action:nil];
         UIBarButtonItem *fixedSpace = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
         fixedSpace.width = 5.0f;
-        [_toolbar setItems:[NSArray arrayWithObjects:fixedSpace,_newTabButton,flexSpace,done,fixedSpace, nil]];
+        [_toolbar setItems:@[fixedSpace,_newTabButton,flexSpace,done,fixedSpace]];
     }
 }
 
