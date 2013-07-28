@@ -297,6 +297,11 @@ typedef enum{
 	[_scrollView addGestureRecognizer:recognizer];
 	recognizer.delegate = self;
 	
+	UISwipeGestureRecognizer *swipeUp = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeGesture:)];
+	[_scrollView addGestureRecognizer:swipeUp];
+	[swipeUp setDirection:UISwipeGestureRecognizerDirectionUp];
+	swipeUp.delegate = self;
+	
 	// setup scrollView
 	_scrollView.decelerationRate = 1.0;//UIScrollViewDecelerationRateNormal;
     _scrollView.delaysContentTouches = NO;
@@ -931,9 +936,19 @@ typedef enum{
     }
     
     // remove the pages from the scrollView
-    [pages enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-        [obj removeFromSuperview];
-    }];
+	NSArray *pgs = [pages copy];
+	[UIView animateWithDuration:0.3 animations:^{
+		[pages enumerateObjectsUsingBlock:^(UIView *page, NSUInteger idx, BOOL *stop) {
+			CGRect frm = page.frame;
+			frm.origin.y = -CGRectGetHeight(frm);
+			page.frame = frm;
+		}];
+	} completion:^(BOOL finished) {
+		[pgs enumerateObjectsUsingBlock:^(UIView *page, NSUInteger idx, BOOL *stop) {
+			[page removeFromSuperview];
+		}];
+	}];
+
          
     // shift the remaining pages in the scrollView
     [[_scrollView subviews] enumerateObjectsUsingBlock:^(id remainingPage, NSUInteger idx, BOOL *stop) {
@@ -1584,13 +1599,27 @@ typedef enum{
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
-	if (_viewMode == HGPageScrollViewModeDeck && !_scrollView.decelerating && !_scrollView.dragging && ![_selectedPage.closeButton hitTest:[touch locationInView:_selectedPage.closeButton] withEvent:nil]) {
+	if ([gestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] && _viewMode == HGPageScrollViewModeDeck) {
+		for (UIView *subview in self.subviews) {
+			if ([subview isKindOfClass:[HGTouchView class]] && CGRectContainsPoint(subview.frame, [touch locationInView:self])) {
+				return YES;
+			}
+		}
+		return NO;
+	}
+	if (_viewMode == HGPageScrollViewModeDeck && !_scrollView.decelerating && !_scrollView.dragging) {
 		return YES;	
         if ([_selectedPage hitTest:[touch locationInView:_selectedPage] withEvent:nil]) {
             [self handleTapGestureFrom:nil];
         }
 	}
 	return NO;	
+}
+
+- (void) handleSwipeGesture:(UISwipeGestureRecognizer *)recognizer {
+	if (recognizer.state == UIGestureRecognizerStateEnded) {
+		[self deleteButtonPressed:nil];
+	}
 }
 
 
