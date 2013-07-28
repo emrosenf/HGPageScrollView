@@ -51,12 +51,6 @@
 @synthesize closeTimer = _closeTimer;
 
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-    HGPageView *page = [((HGPageScrollView*)self.superview) pageAtIndex:[((HGPageScrollView*)self.superview) indexForSelectedPage]];
-    
-    CGPoint convertedPoint = [self convertPoint:point toView:page.closeButton];
-    if ([page.closeButton pointInside:convertedPoint withEvent:event]) {
-        return page.closeButton;
-    }
     if ([self pointInside:point withEvent:event]) {
 		return self.receiver;
         NSLog(@"touched %@ receiver %@", self, [self receiver]);
@@ -174,13 +168,10 @@ typedef enum{
         [(ArticleView*)_selectedPage didRotate:nil];
     }
 
-    _selectedPage.closeButton.hidden = YES;
     NSInteger index = [self indexForSelectedPage];
     if (index != NSNotFound) {
         [self layoutDeck];
         _selectedPage = [self pageAtIndex:index];
-        _selectedPage.closeButton.center = _selectedPage.frame.origin;
-        _selectedPage.closeButton.hidden = NO;
         [self scrollToPageAtIndex:index animated:NO];
         [self setAlphaForPage:_selectedPage];
         
@@ -487,16 +478,9 @@ typedef enum{
     NSInteger selectedPageScrollIndex = [self indexForSelectedPage];
     CGRect identityFrame = _selectedPage.identityFrame;
     
-    if (_selectedPage.closeButton.superview) {
-        [_selectedPage.closeButton removeFromSuperview];
-    }
     [_selectedPage removeFromSuperview];
     [_visiblePages removeObject:_selectedPage];
     _selectedPage = [self loadPageAtIndex:selectedPageScrollIndex insertIntoVisibleIndex:visibleIndex];
-    if (!_selectedPage.closeButton.superview) {
-        _selectedPage.closeButton.center = _selectedPage.frame.origin;
-        [_scrollView addSubview:_selectedPage.closeButton];
-    }
     _selectedPage.identityFrame = identityFrame;
     //_selectedPage.frame = pageFrame;
     _selectedPage.frame = identityFrame;
@@ -508,7 +492,6 @@ typedef enum{
 
 - (void) deleteButtonPressed:(id)sender {
     DebugLog(@"fired %@ ", sender);
-    _selectedPage.closeButton.hidden = YES;
     [self.delegate removePageAtIndex:[self indexForSelectedPage]];
     [self deletePagesAtIndexes:[NSIndexSet indexSetWithIndex:[self indexForSelectedPage]] animated:YES];
     if ([self numberOfPages] == 0) {
@@ -516,7 +499,6 @@ typedef enum{
     }
     if ([self numberOfPages] == 1) {
         [self selectPageAfterDelay:0.3];
-        //[self setViewMode:HGPageScrollViewModePage animated:YES];
     }
 }
 
@@ -575,17 +557,6 @@ typedef enum{
         page.frame = page.identityFrame;
         UIBezierPath *path = [UIBezierPath bezierPathWithRect:page.bounds];
         page.layer.shadowPath = path.CGPath;
-            
-        if (!page.closeButton) {
-            page.closeButton = [WPHitMarginButton buttonWithType:UIButtonTypeCustom];
-            page.closeButton.frame = CGRectMake(0, 0, 29, 29);
-            [page.closeButton setImage:[UIImage imageNamed:@"closebox"] forState:UIControlStateNormal];
-            [page.closeButton setImage:[UIImage imageNamed:@"closebox_pressed"] forState:UIControlStateHighlighted];
-            page.closeButton.center = CGPointMake(0, 0);
-            [page.closeButton addTarget:self action:@selector(deleteButtonPressed:) forControlEvents:UIControlEventTouchUpInside];
-            //page.closeButton.hidden = YES;
-        }
-        
 	}
     
 }
@@ -675,10 +646,7 @@ typedef enum{
             //remove unnecessary views
             [_scrollViewTouch removeFromSuperview];
             [_pageSelectorTouch removeFromSuperview];
-            
-            if (_selectedPage.closeButton) {
-                [_selectedPage.closeButton removeFromSuperview];
-            }
+
         };
     else
         SelectBlock = ^{
@@ -707,8 +675,6 @@ typedef enum{
             frame.origin.x = (self.frame.size.width - frame.size.width) * 0.5 - _scrollView.frame.origin.x 
             + [self indexForSelectedPage] * _scrollView.bounds.size.width;
             _selectedPage.frame = frame;
-            _selectedPage.closeButton.hidden = YES;
-            _selectedPage.closeButton.center = frame.origin;
             
             // hide the page header view
             headerView.alpha = 0.0;	
@@ -760,10 +726,6 @@ typedef enum{
                 [[UIApplication sharedApplication] endIgnoringInteractionEvents];
                 
                 _scrollView.scrollEnabled = YES;				
-                //_scrollView.frame = CGRectMake(0, _scrollViewTouch.frame.origin.y, self.frame.size.width, _scrollViewTouch.frame.size.height);
-                _selectedPage.closeButton.center = _selectedPage.frame.origin;
-                _selectedPage.closeButton.hidden = NO;
-                [_scrollView addSubview:_selectedPage.closeButton];
                 [self addSubview:_scrollViewTouch];
                 [self addSubview: _pageSelectorTouch];
                 if ([self.delegate respondsToSelector:@selector(pageScrollView:didDeselectPageAtIndex:)]) {
@@ -1488,20 +1450,9 @@ typedef enum{
         
         // set the page selector (page control)
         [_pageSelector setCurrentPage:index];
-        
-        if (_selectedPage.closeButton.superview) {
-            [_selectedPage.closeButton removeFromSuperview];
-        }
+
         // set selected page
         _selectedPage = page;
-        
-        if (!_selectedPage.closeButton.superview) {
-            _selectedPage.closeButton.center = _selectedPage.frame.origin;
-            [_scrollView addSubview:_selectedPage.closeButton];
-        }
-        
-        
-        //	NSLog(@"selectedPage: 0x%x (index %d)", page, index );
         
         if (_scrollView.dragging) {
             _isPendingScrolledPageUpdateNotification = YES;
