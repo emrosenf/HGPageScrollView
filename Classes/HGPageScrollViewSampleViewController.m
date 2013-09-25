@@ -243,7 +243,7 @@
             CGFloat margin = 12;
             CGSize size = [textView.text sizeWithFont:textView.font
                                     constrainedToSize:CGSizeMake(textView.frame.size.width, 2000) //very large height
-                                        lineBreakMode:UILineBreakModeWordWrap];
+                                        lineBreakMode:NSLineBreakByWordWrapping];
             CGRect frame = textView.frame;
             frame. size.height = size.height + 4*margin;
             textView.frame = frame;

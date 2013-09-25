@@ -26,7 +26,6 @@
 
 #import "HGPageScrollView.h"
 #import <QuartzCore/QuartzCore.h>
-#import "WPHitMarginButton.h"
 #import "ArticleView.h"
 #import "TransparentToolbar.h"
 
@@ -279,7 +278,6 @@ typedef enum{
         _miniScaleFactor = 0.6f;
         _pageMargin = 20.0f;
     }
-    //_scrollView.backgroundColor = [UIColor greenColor];
     
     _scrollView.backgroundColor = [UIColor clearColor];
     _scrollView.scrollsToTop = NO;
@@ -718,8 +716,7 @@ typedef enum{
         };
     else 
         CompletionBlock = ^(BOOL finished){
-
-            [UIView animateWithDuration:0.1 animations:^(void) {
+			[UIView animateWithDuration:0.1 animations:^(void) {
                 _selectedPage.transform = CGAffineTransformMakeScale(_miniScaleFactor, _miniScaleFactor);	
                 CGRect frame = _selectedPage.frame;
                 frame.origin.y = (self.frame.size.height - frame.size.height) * 0.5 - _scrollView.frame.origin.y;
@@ -729,8 +726,7 @@ typedef enum{
                 _selectedPage.frame = frame;
             } completion:^(BOOL finished) {
                 [[UIApplication sharedApplication] endIgnoringInteractionEvents];
-                
-                _scrollView.scrollEnabled = YES;				
+                _scrollView.scrollEnabled = YES;
                 [self addSubview:_scrollViewTouch];
                 [self addSubview: _pageSelectorTouch];
                 if ([self.delegate respondsToSelector:@selector(pageScrollView:didDeselectPageAtIndex:)]) {
@@ -1324,14 +1320,6 @@ typedef enum{
     
 	// Update selected page.
 	[self scrollViewDidScroll:_scrollView];
-    
-    
-    // for indexes after the visible range, only adjust the scrollView contentSize
-//    if ([self.indexesAfterVisibleRange count] > 0) {
-//        _scrollView.contentSize = CGSizeMake(_numberOfPages * _scrollView.bounds.size.width, _scrollView.bounds.size.height);            
-//        _pageSelector.numberOfPages = _numberOfPages;      
-//    }
-    
 }
 
 - (void)reloadPagesAtIndexes:(NSIndexSet *)indexes;
