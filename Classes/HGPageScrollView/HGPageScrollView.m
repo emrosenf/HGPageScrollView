@@ -282,7 +282,7 @@ typedef enum{
     _scrollView.backgroundColor = [UIColor clearColor];
     _scrollView.scrollsToTop = NO;
     
-    _pageDeckBackgroundView.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"tile_bg"]];
+	_pageDeckBackgroundView.backgroundColor = !HAS_IOS_7 ? [UIColor colorWithPatternImage:[UIImage imageNamed:@"tile_bg"]] : [UIColor colorWithWhite:0.25 alpha:0.7];
     _pageDeckBackgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleHeight;
     
     
@@ -590,7 +590,8 @@ typedef enum{
     
     if (mode==HGPageScrollViewModePage)
         SelectBlock = ^{
-		
+			[UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleDefault;
+            
             [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
 
             UIView *headerView = _pageHeaderView;
@@ -653,7 +654,8 @@ typedef enum{
         };
     else
         SelectBlock = ^{
-		
+			[UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+            
             [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
 
             UIView *headerView = _userHeaderView?_userHeaderView:_pageHeaderView;
@@ -692,8 +694,7 @@ typedef enum{
 	void (^CompletionBlock)(BOOL) = nil;
     if (mode==HGPageScrollViewModePage)
         CompletionBlock = ^(BOOL finished){
-
-            [[UIApplication sharedApplication] endIgnoringInteractionEvents];
+			[[UIApplication sharedApplication] endIgnoringInteractionEvents];
 
             UIView *headerView = _userHeaderView?_userHeaderView:_pageHeaderView;
 
@@ -870,14 +871,15 @@ typedef enum{
     
 
     
-    
-	// add shadow (use shadowPath to improve rendering performance)
-	page.layer.shadowColor = [[UIColor blackColor] CGColor];	
-	page.layer.shadowOffset = CGSizeMake(8.0f, 12.0f);
-	page.layer.shadowOpacity = 0.3f;
-    page.layer.masksToBounds = NO;
-    UIBezierPath *path = [UIBezierPath bezierPathWithRect:((ArticleView*)page).webView.frame];
-    page.layer.shadowPath = path.CGPath;	
+    if (!HAS_IOS_7) {
+		// add shadow (use shadowPath to improve rendering performance)
+		page.layer.shadowColor = [[UIColor blackColor] CGColor];	
+		page.layer.shadowOffset = CGSizeMake(8.0f, 12.0f);
+		page.layer.shadowOpacity = 0.3f;
+		page.layer.masksToBounds = NO;
+		UIBezierPath *path = [UIBezierPath bezierPathWithRect:((ArticleView*)page).webView.frame];
+		page.layer.shadowPath = path.CGPath;
+	}
  
     // add the page to the scroller
 	[_scrollView insertSubview:page atIndex:0];
