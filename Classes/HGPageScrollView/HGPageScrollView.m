@@ -311,7 +311,7 @@ typedef enum{
 	
 	// setup pageSelector
 	[_pageSelector addTarget:self action:@selector(didChangePageValue:) forControlEvents:UIControlEventValueChanged];
-	
+	_pageSelector.hidden = YES;
 	// default number of pages 
 	_numberOfPages = 1;
 	
@@ -654,14 +654,16 @@ typedef enum{
         };
     else
         SelectBlock = ^{
+#if defined(__IPHONE_7_0)
 			[UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
+#endif
             
             [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
 
             UIView *headerView = _userHeaderView?_userHeaderView:_pageHeaderView;
             
             // move to HGPageScrollViewModeDeck
-            _pageSelector.hidden = NO;
+            //_pageSelector.hidden = NO;
             _pageDeckTitleLabel.hidden = NO;
             _pageDeckSubtitleLabel.hidden = NO;
             [self initDeckTitlesForPageAtIndex:selectedIndex];
@@ -701,7 +703,7 @@ typedef enum{
             // set flags
             _pageDeckTitleLabel.hidden = YES;
             _pageDeckSubtitleLabel.hidden = YES;
-            _pageSelector.hidden = YES;
+            //_pageSelector.hidden = YES;
             _scrollView.scrollEnabled = NO;
             _selectedPage.alpha = 1.0;
             // copy _selectedPage up in the view hierarchy, to allow touch events on its entire frame 
@@ -990,16 +992,6 @@ typedef enum{
             [self updateScrolledPage:newSelectedPage index:newSelectedPageIndex];
         }
     }
-
-    // adjust _scrollView content size
-//    CGSize newContentSize = _scrollView.contentSize;
-//    newContentSize.width -= [pages count] * _scrollView.frame.size.width;
-//    _scrollView.contentSize = newContentSize;
-//    
-//    // adjust page selector (control)
-//    _pageSelector.numberOfPages -= [pages count];
-    
-
 }
 
 
@@ -1348,7 +1340,6 @@ typedef enum{
         [_scrollView setContentOffset:CGPointMake((_numberOfPages-1) * _scrollView.bounds.size.width, 0) animated:YES];
     }*/
     _scrollView.contentSize = newSize;
-    
     _pageSelector.numberOfPages = _numberOfPages;      
 
 }
