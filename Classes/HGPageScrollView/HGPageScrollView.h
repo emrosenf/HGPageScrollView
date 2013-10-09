@@ -102,8 +102,6 @@ typedef enum{
 
 	@private
 	
-	HGPageScrollViewMode _viewMode;
-
 	IBOutlet id <HGPageScrollViewDelegate>  __weak _delegate;
 	IBOutlet id <HGPageScrollViewDataSource>  __weak _dataSource;
 

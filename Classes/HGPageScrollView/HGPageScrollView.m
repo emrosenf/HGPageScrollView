@@ -101,7 +101,7 @@ typedef enum{
 @property (nonatomic, strong) NSIndexSet *indexesBeforeVisibleRange; 
 @property (nonatomic, strong) NSIndexSet *indexesWithinVisibleRange; 
 @property (nonatomic, strong) NSIndexSet *indexesAfterVisibleRange; 
-
+@property (nonatomic, readwrite) HGPageScrollViewMode viewMode;
 @end
 
 
@@ -128,7 +128,6 @@ typedef enum{
 @synthesize pageDeckBackgroundView	= _pageDeckBackgroundView;
 @synthesize dataSource				= _dataSource;
 @synthesize delegate				= _delegate;
-@synthesize viewMode				= _viewMode;
 
 @synthesize indexesBeforeVisibleRange;
 @synthesize indexesWithinVisibleRange;
@@ -159,7 +158,7 @@ typedef enum{
 	}
 	if (value) return;
     if (!_selectedPage) return;
-    if (_viewMode == HGPageScrollViewModePage) {
+    if (self.viewMode == HGPageScrollViewModePage) {
         if (!_selectedPage.superview) {
             [_visiblePages addObject:_selectedPage];
             [self addSubview:_selectedPage];
@@ -320,7 +319,7 @@ typedef enum{
 	_visibleIndexes.length = 1;
 	
     // set initial view mode
-    _viewMode = HGPageScrollViewModeDeck;
+    self.viewMode = HGPageScrollViewModeDeck;
     
 	// load the data 
 	[self reloadData];
@@ -567,11 +566,11 @@ typedef enum{
 
 - (void) setViewMode:(HGPageScrollViewMode)mode animated:(BOOL)animated;
 {
-	if (_viewMode == mode) {
+	if (self.viewMode == mode) {
 		return;
 	}
 	
-	_viewMode = mode;
+	self.viewMode = mode;
     
 	NSInteger selectedIndex = [self indexForSelectedPage];
     
@@ -826,8 +825,8 @@ typedef enum{
     
     // reloading the data implicitely resets the viewMode to UIPageScrollViewModeDeck. 
     // here we restore the view mode in case this is not the first time reloadData is called (i.e. if there if a _selectedPage).   
-    if (_selectedPage && _viewMode==HGPageScrollViewModePage) { 
-        _viewMode = HGPageScrollViewModeDeck;
+    if (_selectedPage && self.viewMode==HGPageScrollViewModePage) { 
+        self.viewMode = HGPageScrollViewModeDeck;
         [self setViewMode:HGPageScrollViewModePage animated:NO];
     }
 }
@@ -1039,7 +1038,7 @@ typedef enum{
     // store this frame for the backward animation
     ((HGPageView*)page).identityFrame = frm; 
     
-    if (_viewMode == HGPageScrollViewModeDeck) {        
+    if (self.viewMode == HGPageScrollViewModeDeck) {        
             
         page.transform = CGAffineTransformMakeScale(_miniScaleFactor, _miniScaleFactor);
         CGFloat contentOffset = index * _scrollView.frame.size.width;
@@ -1519,7 +1518,7 @@ typedef enum{
 
 - (void) setAlphaForPage : (UIView*) page
 {
-    if (_viewMode == HGPageScrollViewModePage) return;
+    if (self.viewMode == HGPageScrollViewModePage) return;
 	CGFloat delta = _pageMargin + _scrollView.contentOffset.x - page.frame.origin.x;
 	CGFloat step = self.frame.size.width;
 	CGFloat alpha = 1.0 - fabs(delta/step);
@@ -1580,7 +1579,7 @@ typedef enum{
 
 - (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldReceiveTouch:(UITouch *)touch
 {
-	if ([gestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] && _viewMode == HGPageScrollViewModeDeck) {
+	if ([gestureRecognizer isKindOfClass:[UISwipeGestureRecognizer class]] && self.viewMode == HGPageScrollViewModeDeck) {
 		for (UIView *subview in self.subviews) {
 			if ([subview isKindOfClass:[HGTouchView class]] && CGRectContainsPoint(subview.frame, [touch locationInView:self])) {
 				return YES;
@@ -1588,7 +1587,7 @@ typedef enum{
 		}
 		return NO;
 	}
-	if (_viewMode == HGPageScrollViewModeDeck && !_scrollView.decelerating && !_scrollView.dragging) {
+	if (self.viewMode == HGPageScrollViewModeDeck && !_scrollView.decelerating && !_scrollView.dragging) {
 		return YES;	
         if ([_selectedPage hitTest:[touch locationInView:_selectedPage] withEvent:nil]) {
             [self handleTapGestureFrom:nil];
