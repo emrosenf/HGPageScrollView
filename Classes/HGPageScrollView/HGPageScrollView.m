@@ -189,9 +189,10 @@ typedef enum{
     if (!UIInterfaceOrientationIsPortrait(orientation) && !UIInterfaceOrientationIsLandscape(orientation)) {
         orientation = _lastOrientation;
     }
+	NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
+	
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
     {
-		NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
 		
         if (UIInterfaceOrientationIsLandscape(orientation)) {
             width = _miniScaleFactor * SCREEN_HEIGHT;
@@ -212,11 +213,10 @@ typedef enum{
         if (UIInterfaceOrientationIsLandscape(orientation)) {
             width = _miniScaleFactor * SCREEN_HEIGHT;
             height = _miniScaleFactor * 768-44;
-            selfFrm.size.height = 748-44;
+            selfFrm.size.height = 768 - statusBar - 44;
         }
         else {
-			NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
-            width = _miniScaleFactor * 768;
+			width = _miniScaleFactor * 768;
             height = _miniScaleFactor * (SCREEN_HEIGHT - 44);
             selfFrm.size.height = (SCREEN_HEIGHT - statusBar - 44);
         }
@@ -325,11 +325,12 @@ typedef enum{
 	[self reloadData];
     
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
-        _toolbar = [[TransparentToolbar alloc] initWithFrame:CGRectMake(0, self.frame.size.height-44, self.frame.size.width, 44)];
+        _toolbar = [[TransparentToolbar alloc] initWithFrame:CGRectMake(0, self.frame.size.height-66, self.frame.size.width, 44)];
         _toolbar.autoresizingMask = UIViewAutoresizingFlexibleWidth|UIViewAutoresizingFlexibleTopMargin;
         _toolbar.translucent = YES;
         _toolbar.opaque = NO;
         _toolbar.backgroundColor = [UIColor clearColor];
+		_toolbar.tintColor = UIColorFromRGB(0xdfe1e5);
         
         
         [self addSubview:_toolbar];
