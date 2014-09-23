@@ -190,35 +190,39 @@ typedef enum{
         orientation = _lastOrientation;
     }
 	NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
+	CGSize screenSize = [UIScreen mainScreen].bounds.size;
+	CGFloat deviceWidth = MIN(screenSize.height, screenSize.width);
+	CGFloat deviceHeight = MAX(screenSize.height, screenSize.width);
+	
 	
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
     {
 		
         if (UIInterfaceOrientationIsLandscape(orientation)) {
-            width = _miniScaleFactor * SCREEN_HEIGHT;
-            height = _miniScaleFactor * (320 - 30 - statusBar);
-            selfFrm.size.height = (320 - 30 - statusBar);
+            width = _miniScaleFactor * deviceHeight;
+            height = _miniScaleFactor * (deviceWidth - 30 - statusBar);
+            selfFrm.size.height = (deviceWidth - 30 - statusBar);
         }
         else {
 			
-            width = _miniScaleFactor * 320;
-            height = _miniScaleFactor * (SCREEN_HEIGHT - statusBar - 44);
+            width = _miniScaleFactor * deviceWidth;
+            height = _miniScaleFactor * (deviceHeight - statusBar - 44);
 #if WIKI || WIKITRAVEL
-            selfFrm.size.height = SCREEN_HEIGHT - statusBar - 44;
+            selfFrm.size.height = deviceHeight - statusBar - 44;
 #else
-            selfFrm.size.height = SCREEN_HEIGHT - statusBar - 88;
+            selfFrm.size.height = deviceHeight - statusBar - 88;
 #endif
         }
     } else {
         if (UIInterfaceOrientationIsLandscape(orientation)) {
-            width = _miniScaleFactor * SCREEN_HEIGHT;
-            height = _miniScaleFactor * 768-44;
-            selfFrm.size.height = 768 - statusBar - 44;
+            width = _miniScaleFactor * deviceHeight;
+            height = _miniScaleFactor * deviceWidth-44;
+            selfFrm.size.height = deviceWidth - statusBar - 44;
         }
         else {
-			width = _miniScaleFactor * 768;
-            height = _miniScaleFactor * (SCREEN_HEIGHT - 44);
-            selfFrm.size.height = (SCREEN_HEIGHT - statusBar - 44);
+			width = _miniScaleFactor * deviceWidth;
+            height = _miniScaleFactor * (deviceHeight - 44);
+            selfFrm.size.height = (deviceHeight - statusBar - 44);
         }
     }
           
@@ -233,17 +237,15 @@ typedef enum{
     
     _scrollView.contentSize = CGSizeMake(_numberOfPages * _scrollView.bounds.size.width, 50);
     for (int i = 0; i < [self numberOfPages]; i++) {
-        //if (i != [self indexForSelectedPage]) {
-            HGPageView *page = [self pageAtIndex:i];
-            [self setFrameForPage:page atIndex:i];
-
-        //}
+        HGPageView *page = [self pageAtIndex:i];
+		[self setFrameForPage:page atIndex:i];
     }
     
     frm = _pageSelector.frame;
+	
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone) {
         if (UIInterfaceOrientationIsLandscape(orientation)) {
-            frm.origin.y = 220;
+            frm.origin.y = deviceWidth - 80;
         } else {
             frm.origin.y = SCREEN_HEIGHT - 120;
         }
@@ -533,25 +535,29 @@ typedef enum{
         if (!UIInterfaceOrientationIsPortrait(orientation) && !UIInterfaceOrientationIsLandscape(orientation)) {
             orientation = _lastOrientation;
         }
+		CGSize screenSize = [UIScreen mainScreen].bounds.size;
+		CGFloat deviceWidth = MIN(screenSize.height, screenSize.width);
+		CGFloat deviceHeight = MAX(screenSize.height, screenSize.width);
+			
 		NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
         if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
         {
             if (UIInterfaceOrientationIsLandscape(orientation)) {
-                frm.size.width = SCREEN_HEIGHT;
-                frm.size.height = 320 - 30 - statusBar;
+                frm.size.width = deviceHeight;
+                frm.size.height = deviceWidth - 30 - statusBar;
             }
             else {
-                frm.size.width = 320;
-                frm.size.height = SCREEN_HEIGHT- statusBar - 44;
+                frm.size.width = deviceWidth;
+                frm.size.height = deviceHeight- statusBar - 44;
             }
         } else {
             if (UIInterfaceOrientationIsLandscape(orientation)) {
-                frm.size.width = SCREEN_HEIGHT;
-                frm.size.height = 748-44;
+                frm.size.width = deviceHeight;
+                frm.size.height = deviceWidth-44;
             }
             else {
-                frm.size.width = 768;
-                frm.size.height = SCREEN_HEIGHT - statusBar - 44;
+                frm.size.width = deviceWidth;
+                frm.size.height = deviceHeight - statusBar - 44;
             }
         }
             
@@ -654,10 +660,7 @@ typedef enum{
         };
     else
         SelectBlock = ^{
-#if defined(__IPHONE_7_0)
 			[UIApplication sharedApplication].statusBarStyle = UIStatusBarStyleLightContent;
-#endif
-            
             [[UIApplication sharedApplication] beginIgnoringInteractionEvents];
 
             UIView *headerView = _userHeaderView?_userHeaderView:_pageHeaderView;
@@ -672,8 +675,12 @@ typedef enum{
             [_scrollView addSubview:_selectedPage];
             CGRect frame = _selectedPage.frame;
 			NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
-            if (frame.size.width == SCREEN_HEIGHT && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
-                frame.size.height = 320 - 30 - statusBar;
+			CGSize screenSize = [UIScreen mainScreen].bounds.size;
+			CGFloat deviceWidth = MIN(screenSize.height, screenSize.width);
+			CGFloat deviceHeight = MAX(screenSize.height, screenSize.width);
+			
+            if (frame.size.width == deviceHeight && UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
+                frame.size.height = deviceWidth - 30 - statusBar;
             _selectedPage.frame = frame;
             _selectedPage.transform = CGAffineTransformMakeScale(_miniScaleFactor-0.1f, _miniScaleFactor-0.1f);	
             frame = _selectedPage.frame;
@@ -1009,24 +1016,27 @@ typedef enum{
         orientation = _lastOrientation;
     }
 	NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
+	CGSize screenSize = [UIScreen mainScreen].bounds.size;
+	CGFloat deviceWidth = MIN(screenSize.height, screenSize.width);
+	CGFloat deviceHeight = MAX(screenSize.height, screenSize.width);
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPhone)
     {
         if (UIInterfaceOrientationIsLandscape(orientation)) {
-            frm.size.width = SCREEN_HEIGHT;
-            frm.size.height = 320 - 30 - statusBar;
+            frm.size.width = MAX(screenSize.width, screenSize.height);
+            frm.size.height = MIN(screenSize.width, screenSize.height) - 30 - statusBar;
         }
         else {
-            frm.size.width = 320;
-            frm.size.height = SCREEN_HEIGHT- statusBar - 44;
+            frm.size.width = deviceWidth;
+            frm.size.height = deviceHeight- statusBar - 44;
         }
     } else {
         if (UIInterfaceOrientationIsLandscape(orientation)) {
-            frm.size.width = SCREEN_HEIGHT;
-            frm.size.height = 748-44;
+            frm.size.width = deviceHeight;
+            frm.size.height = deviceWidth-44;
         }
         else {
-            frm.size.width = 768;
-            frm.size.height = SCREEN_HEIGHT - statusBar - 44;
+            frm.size.width = deviceWidth;
+            frm.size.height = deviceHeight - statusBar - 44;
         }
     }
     page.frame = frm;
@@ -1200,7 +1210,11 @@ typedef enum{
         // We don't have an instance of the deleted pages and we cannot ask the data source to provide them because they've already been deleted. As a temp solution we take the default page width of 320. 
         // This assumption may be wrong if the data source uses anotehr page width or alternatively varying page widths.
 		NSUInteger statusBar = HAS_IOS_7 ? 0 : 20;
-        UIView *pseudoPage = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, SCREEN_HEIGHT - statusBar)];
+		CGSize screenSize = [UIScreen mainScreen].bounds.size;
+		CGFloat deviceWidth = MIN(screenSize.height, screenSize.width);
+		CGFloat deviceHeight = MAX(screenSize.height, screenSize.width);
+		
+        UIView *pseudoPage = [[UIView alloc] initWithFrame:CGRectMake(0, 0, deviceWidth, deviceHeight - statusBar)];
         [self setFrameForPage:pseudoPage atIndex:idx];
         [_deletedPages addObject:pseudoPage];
         _visibleIndexes.location--;
